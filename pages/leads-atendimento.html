@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leads / Atendimento | AppCall - Pagah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { ubuntu: ['Ubuntu', 'sans-serif'] } } }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Ubuntu', sans-serif; }
+
+    /* Multi-select & date picker custom styles */
+    .ms-trigger {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; border: 1px solid #DADADA; border-radius: 0.5rem;
+      padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #1C1C1C;
+      background: #fff; cursor: pointer; min-height: 38px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .ms-trigger:hover { border-color: #b0b0b0; }
+    .ms-trigger.open, .ms-trigger:focus { border-color: #F1E52F; box-shadow: 0 0 0 2px rgba(241,229,47,0.2); outline: none; }
+    .ms-trigger .placeholder { color: #9ca3af; }
+    .ms-trigger .chevron { transition: transform 0.2s; flex-shrink: 0; margin-left: 4px; }
+    .ms-trigger.open .chevron { transform: rotate(180deg); }
+    .ms-pill { display: inline-flex; align-items: center; background: #F2F2F2; color: #1C1C1C; font-size: 0.75rem; border-radius: 9999px; padding: 0.125rem 0.5rem; white-space: nowrap; }
+    .ms-panel {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: #fff; border-radius: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.12), 0 4px 10px -5px rgba(0,0,0,0.06);
+      z-index: 30; display: none; overflow: hidden;
+    }
+    .ms-panel.open { display: block; }
+    .ms-search { width: 100%; border: none; border-bottom: 1px solid #F2F2F2; padding: 0.625rem 0.75rem 0.625rem 2.25rem; font-size: 0.8125rem; outline: none; background: transparent; }
+    .ms-search:focus { border-bottom-color: #F1E52F; }
+    .ms-actions { display: flex; justify-content: space-between; padding: 0.375rem 0.75rem; border-bottom: 1px solid #F2F2F2; }
+    .ms-actions a { font-size: 0.75rem; color: #575756; cursor: pointer; text-decoration: none; }
+    .ms-actions a:hover { color: #1C1C1C; }
+    .ms-list { max-height: 12rem; overflow-y: auto; padding: 0.25rem 0; }
+    .ms-list::-webkit-scrollbar { width: 4px; }
+    .ms-list::-webkit-scrollbar-thumb { background: #DADADA; border-radius: 4px; }
+    .ms-option { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; cursor: pointer; font-size: 0.8125rem; color: #1C1C1C; transition: background 0.1s; }
+    .ms-option:hover { background: #F2F2F2; }
+    .ms-option input[type="checkbox"] { width: 1rem; height: 1rem; accent-color: #F1E52F; cursor: pointer; flex-shrink: 0; }
+
+    /* Date range picker */
+    .drp-trigger { display: flex; align-items: center; gap: 0.5rem; width: 100%; border: 1px solid #DADADA; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #1C1C1C; background: #fff; cursor: pointer; min-height: 38px; transition: border-color 0.15s, box-shadow 0.15s; }
+    .drp-trigger:hover { border-color: #b0b0b0; }
+    .drp-trigger.open, .drp-trigger:focus { border-color: #F1E52F; box-shadow: 0 0 0 2px rgba(241,229,47,0.2); outline: none; }
+    .drp-panel { position: absolute; top: calc(100% + 4px); left: 0; background: #fff; border-radius: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.12), 0 4px 10px -5px rgba(0,0,0,0.06); z-index: 30; display: none; padding: 1rem; min-width: 280px; }
+    .drp-panel.open { display: block; }
+    .drp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    .drp-header button { background: none; border: none; cursor: pointer; color: #575756; padding: 0.25rem; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; }
+    .drp-header button:hover { background: #F2F2F2; }
+    .drp-header span { font-size: 0.875rem; font-weight: 600; color: #1C1C1C; }
+    .drp-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; margin-bottom: 0.25rem; }
+    .drp-weekdays span { text-align: center; font-size: 0.6875rem; font-weight: 600; color: #575756; padding: 0.25rem 0; text-transform: uppercase; }
+    .drp-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+    .drp-day { text-align: center; font-size: 0.8125rem; padding: 0.375rem; border-radius: 0.375rem; cursor: pointer; color: #1C1C1C; position: relative; transition: all 0.1s; }
+    .drp-day:hover { background: #F2F2F2; }
+    .drp-day.empty { cursor: default; }
+    .drp-day.empty:hover { background: transparent; }
+    .drp-day.today::after { content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: #F1E52F; }
+    .drp-day.start, .drp-day.end { background: #F1E52F !important; color: #1C1C1C; font-weight: 600; }
+    .drp-day.in-range { background: rgba(241,229,47,0.15); border-radius: 0; }
+    .drp-day.start { border-radius: 0.375rem 0 0 0.375rem; }
+    .drp-day.end { border-radius: 0 0.375rem 0.375rem 0; }
+    .drp-day.start.end { border-radius: 0.375rem; }
+    .drp-day.other-month { color: #DADADA; }
+    .drp-footer { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #F2F2F2; }
+    .drp-footer button { padding: 0.375rem 0.875rem; border-radius: 0.5rem; font-size: 0.8125rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .drp-footer .btn-clear { background: transparent; border: 1px solid #DADADA; color: #575756; }
+    .drp-footer .btn-clear:hover { background: #F2F2F2; }
+    .drp-footer .btn-apply { background: #F1E52F; border: 1px solid #F1E52F; color: #1C1C1C; }
+    .drp-footer .btn-apply:hover { filter: brightness(0.95); }
+
+    .filter-label { font-size: 0.75rem; font-weight: 600; color: #575756; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; display: block; }
+    .filter-input { width: 100%; border: 1px solid #DADADA; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #1C1C1C; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+    .filter-input:focus { border-color: #F1E52F; box-shadow: 0 0 0 2px rgba(241,229,47,0.2); }
+  </style>
+</head>
+<body class="bg-[#F2F2F2] flex h-screen overflow-hidden">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="bg-white flex flex-col border-r border-[#DADADA] transition-all duration-300 h-screen flex-shrink-0" style="width:260px;">
+
+    <!-- Logo area -->
+    <div class="flex items-center px-4 py-5 border-b border-[#DADADA]" style="min-height:72px;">
+      <img id="logo-expanded" src="../assets/pagcall/logo/svg/Logo-alternativo.svg" alt="PagCall" class="h-8 object-contain transition-all duration-300">
+      <img id="logo-compact" src="../assets/pagcall/logo/svg/Icone.svg" alt="PagCall" class="h-8 object-contain transition-all duration-300 hidden">
+    </div>
+
+    <!-- Nav items -->
+    <nav class="flex-1 py-4 flex flex-col gap-1 px-2 overflow-hidden">
+
+      <!-- Dashboard (inactive) -->
+      <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
+        <span class="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        </span>
+        <span class="nav-label text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300">Dashboard</span>
+      </a>
+
+      <!-- Leads / Atendimento (active) -->
+      <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#F2F2F2] text-[#1C1C1C] font-semibold border-r-[3px] border-[#F1E52F] transition-colors group">
+        <span class="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+          <i data-lucide="phone-call" class="w-5 h-5"></i>
+        </span>
+        <span class="nav-label text-sm whitespace-nowrap overflow-hidden transition-all duration-300">Leads / Atendimento</span>
+      </a>
+
+    </nav>
+
+    <!-- Toggle button -->
+    <div class="border-t border-[#DADADA] p-3">
+      <button onclick="toggleSidebar()" class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors">
+        <i id="toggle-icon" data-lucide="panel-left-close" class="w-4 h-4 flex-shrink-0"></i>
+        <span id="toggle-label" class="nav-label text-xs whitespace-nowrap overflow-hidden transition-all duration-300">Recolher</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- Yellow strip header -->
+    <header class="h-2 bg-[#F1E52F] flex-shrink-0"></header>
+
+    <!-- Page header bar -->
+    <div class="bg-white border-b border-[#DADADA] px-6 py-3 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <i data-lucide="phone-call" class="w-5 h-5 text-[#575756]"></i>
+        <h1 class="text-base font-semibold text-[#1C1C1C]">Leads / Atendimento</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-right">
+          <p class="text-xs font-semibold text-[#1C1C1C]">João Vendedor</p>
+          <p class="text-xs text-[#575756]">Vendedor · EMP001</p>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-[#F1E52F] flex items-center justify-center">
+          <span class="text-xs font-bold text-[#1C1C1C]">JV</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrollable content -->
+    <main class="flex-1 overflow-y-auto p-6">
+
+      <!-- Filters card -->
+      <div class="bg-white rounded-xl shadow-sm p-5 mb-5">
+        <h2 class="text-sm font-semibold text-[#1C1C1C] mb-4 flex items-center gap-2">
+          <i data-lucide="filter" class="w-4 h-4 text-[#575756]"></i>
+          Filtros
+        </h2>
+
+        <!-- Row 1 -->
+        <div class="grid grid-cols-4 gap-4 mb-4">
+          <div class="relative" id="ms-empresa"></div>
+          <div class="relative" id="ms-tipo-lead"></div>
+          <div>
+            <label class="filter-label">Nome</label>
+            <input type="text" placeholder="Buscar por nome..." class="filter-input">
+          </div>
+          <div>
+            <label class="filter-label">Telefone</label>
+            <input type="text" placeholder="(00) 00000-0000" class="filter-input">
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="grid grid-cols-4 gap-4 mb-4">
+          <div>
+            <label class="filter-label">CPF</label>
+            <input type="text" placeholder="000.000.000-00" class="filter-input">
+          </div>
+          <div class="relative" id="ms-valor"></div>
+          <div class="relative" id="drp-periodo"></div>
+          <div class="flex items-end">
+            <div class="w-full border border-[#DADADA] rounded-lg px-3 py-2 flex items-center gap-2 bg-white cursor-pointer hover:border-[#F1E52F] transition-colors">
+              <input type="checkbox" id="toggle-nao-atendidos" class="w-4 h-4 accent-[#F1E52F]">
+              <label for="toggle-nao-atendidos" class="text-sm text-[#1C1C1C] cursor-pointer whitespace-nowrap">Somente não atendidos</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action row -->
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-[#575756]">Exibindo <strong class="text-[#1C1C1C]">10</strong> de <strong class="text-[#1C1C1C]">847</strong> leads</span>
+          <button class="flex items-center gap-2 px-5 py-2 bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-sm hover:brightness-95 transition-all">
+            <i data-lucide="search" class="w-4 h-4"></i>
+            Filtrar
+          </button>
+        </div>
+      </div>
+
+      <!-- Table card -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-5">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-[#1C1C1C] text-white text-xs uppercase">
+                <th class="px-4 py-3 text-left font-semibold tracking-wide">ID Empresa</th>
+                <th class="px-4 py-3 text-left font-semibold tracking-wide">Nome Cliente</th>
+                <th class="px-4 py-3 text-left font-semibold tracking-wide">Telefone</th>
+                <th class="px-4 py-3 text-left font-semibold tracking-wide">Data Ocorrência</th>
+                <th class="px-4 py-3 text-left font-semibold tracking-wide">Erro</th>
+                <th class="px-4 py-3 text-left font-semibold tracking-wide">Endereço</th>
+                <th class="px-4 py-3 text-left font-semibold tracking-wide">KIT</th>
+                <th class="px-4 py-3 text-center font-semibold tracking-wide">Ações</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#F2F2F2]">
+
+              <!-- Row 1 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                <td class="px-4 py-3">
+                  <span class="font-medium text-[#1C1C1C]">Carlos Eduardo Silva</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756]">(11) 98765-4321</td>
+                <td class="px-4 py-3 text-[#575756] text-xs">30/03/2026 14:30</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 border border-red-200">Visa recusado</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756] text-xs max-w-[160px] truncate">Rua das Flores 123 SP</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs">
+                    <p class="font-medium text-[#1C1C1C]">Kit Emagrecedor</p>
+                    <p class="text-[#575756]">3x R$ 297,00</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button onclick="openAtenderModal('Carlos Eduardo Silva')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-xs hover:brightness-95 transition-all">
+                    <i data-lucide="phone" class="w-3 h-3"></i>
+                    Atender
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 2 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP002</td>
+                <td class="px-4 py-3">
+                  <span class="font-medium text-[#1C1C1C]">Ana Maria Souza</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756]">(21) 97654-3210</td>
+                <td class="px-4 py-3 text-[#575756] text-xs">30/03/2026 11:15</td>
+                <td class="px-4 py-3">
+                  <span class="text-[#575756] text-xs">—</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756] text-xs max-w-[160px] truncate">Av. Brasil 456 RJ</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs">
+                    <p class="font-medium text-[#1C1C1C]">Kit Capilar Premium</p>
+                    <p class="text-[#575756]">R$ 189,90</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button onclick="openAtenderModal('Ana Maria Souza')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-xs hover:brightness-95 transition-all">
+                    <i data-lucide="phone" class="w-3 h-3"></i>
+                    Atender
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 3 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                <td class="px-4 py-3">
+                  <span class="font-medium text-[#1C1C1C]">Roberto Fernandes</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756]">(31) 99876-5432</td>
+                <td class="px-4 py-3 text-[#575756] text-xs">29/03/2026 16:45</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">Saldo insuficiente</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756] text-xs max-w-[160px] truncate">Rua Minas Gerais 789 BH</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs">
+                    <p class="font-medium text-[#1C1C1C]">Kit Whey+Creatina</p>
+                    <p class="text-[#575756]">R$ 347,00</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button onclick="openAtenderModal('Roberto Fernandes')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-xs hover:brightness-95 transition-all">
+                    <i data-lucide="phone" class="w-3 h-3"></i>
+                    Atender
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 4 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP003</td>
+                <td class="px-4 py-3">
+                  <span class="font-medium text-[#1C1C1C]">Juliana Costa</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756]">(41) 98543-2109</td>
+                <td class="px-4 py-3 text-[#575756] text-xs">29/03/2026 09:20</td>
+                <td class="px-4 py-3">
+                  <span class="text-[#575756] text-xs">—</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756] text-xs max-w-[160px] truncate">Rua XV de Novembro 321 CWB</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs">
+                    <p class="font-medium text-[#1C1C1C]">Amostra Serum Facial</p>
+                    <p class="text-[#575756]">R$ 49,90</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button onclick="openAtenderModal('Juliana Costa')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-xs hover:brightness-95 transition-all">
+                    <i data-lucide="phone" class="w-3 h-3"></i>
+                    Atender
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 5 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP004</td>
+                <td class="px-4 py-3">
+                  <span class="font-medium text-[#1C1C1C]">Marcos Oliveira</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756]">(51) 97432-1098</td>
+                <td class="px-4 py-3 text-[#575756] text-xs">28/03/2026 13:50</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 border border-red-200">Master recusado</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756] text-xs max-w-[160px] truncate">Av Ipiranga 654 POA</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs">
+                    <p class="font-medium text-[#1C1C1C]">Kit Derma Anti-idade</p>
+                    <p class="text-[#575756]">5x R$ 497,00</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button onclick="openAtenderModal('Marcos Oliveira')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-xs hover:brightness-95 transition-all">
+                    <i data-lucide="phone" class="w-3 h-3"></i>
+                    Atender
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 6 — ATENDIDO -->
+              <tr class="bg-green-50 hover:bg-green-100 transition-colors">
+                <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                <td class="px-4 py-3">
+                  <span class="font-medium text-[#1C1C1C]">Fernanda Alves</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756]">(61) 96321-0987</td>
+                <td class="px-4 py-3 text-[#575756] text-xs">28/03/2026 10:00</td>
+                <td class="px-4 py-3">
+                  <span class="text-[#575756] text-xs">—</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756] text-xs max-w-[160px] truncate">SQS 308 Bloco A BSB</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs">
+                    <p class="font-medium text-[#1C1C1C]">Kit Emagrecedor</p>
+                    <p class="text-[#575756]">1x R$ 127,00</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 font-semibold rounded-lg text-xs border border-green-200">
+                    <i data-lucide="check-circle" class="w-3 h-3"></i>
+                    Atendido
+                  </span>
+                </td>
+              </tr>
+
+              <!-- Row 7 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP002</td>
+                <td class="px-4 py-3">
+                  <span class="font-medium text-[#1C1C1C]">Lucas Mendes</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756]">(71) 95210-9876</td>
+                <td class="px-4 py-3 text-[#575756] text-xs">27/03/2026 15:30</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">Pix expirado</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756] text-xs max-w-[160px] truncate">Rua da Bahia 987 SSA</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs">
+                    <p class="font-medium text-[#1C1C1C]">Kit Capilar Basico</p>
+                    <p class="text-[#575756]">R$ 89,90</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button onclick="openAtenderModal('Lucas Mendes')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-xs hover:brightness-95 transition-all">
+                    <i data-lucide="phone" class="w-3 h-3"></i>
+                    Atender
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 8 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP003</td>
+                <td class="px-4 py-3">
+                  <span class="font-medium text-[#1C1C1C]">Patricia Souza</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756]">(81) 94109-8765</td>
+                <td class="px-4 py-3 text-[#575756] text-xs">27/03/2026 08:45</td>
+                <td class="px-4 py-3">
+                  <span class="text-[#575756] text-xs">—</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756] text-xs max-w-[160px] truncate">Av Boa Viagem 555 REC</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs">
+                    <p class="font-medium text-[#1C1C1C]">Kit FitMax Completo</p>
+                    <p class="text-[#575756]">R$ 397,00</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button onclick="openAtenderModal('Patricia Souza')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-xs hover:brightness-95 transition-all">
+                    <i data-lucide="phone" class="w-3 h-3"></i>
+                    Atender
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 9 — ATENDIDO -->
+              <tr class="bg-green-50 hover:bg-green-100 transition-colors">
+                <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP004</td>
+                <td class="px-4 py-3">
+                  <span class="font-medium text-[#1C1C1C]">Rafael Costa</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756]">(85) 93098-7654</td>
+                <td class="px-4 py-3 text-[#575756] text-xs">26/03/2026 17:10</td>
+                <td class="px-4 py-3">
+                  <span class="text-[#575756] text-xs">—</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756] text-xs max-w-[160px] truncate">Rua Fortaleza 222 FOR</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs">
+                    <p class="font-medium text-[#1C1C1C]">Amostra DermaPlus</p>
+                    <p class="text-[#575756]">R$ 39,90</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 font-semibold rounded-lg text-xs border border-green-200">
+                    <i data-lucide="check-circle" class="w-3 h-3"></i>
+                    Atendido
+                  </span>
+                </td>
+              </tr>
+
+              <!-- Row 10 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                <td class="px-4 py-3">
+                  <span class="font-medium text-[#1C1C1C]">Camila Rodrigues</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756]">(91) 92087-6543</td>
+                <td class="px-4 py-3 text-[#575756] text-xs">26/03/2026 11:30</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 border border-red-200">Elo recusado</span>
+                </td>
+                <td class="px-4 py-3 text-[#575756] text-xs max-w-[160px] truncate">Tv do Chaco 100 BEL</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs">
+                    <p class="font-medium text-[#1C1C1C]">Kit Emagrecedor</p>
+                    <p class="text-[#575756]">5x R$ 447,00</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button onclick="openAtenderModal('Camila Rodrigues')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-xs hover:brightness-95 transition-all">
+                    <i data-lucide="phone" class="w-3 h-3"></i>
+                    Atender
+                  </button>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-between bg-white rounded-xl shadow-sm px-5 py-3">
+        <span class="text-xs text-[#575756]">Página <strong class="text-[#1C1C1C]">1</strong> de <strong class="text-[#1C1C1C]">85</strong></span>
+        <div class="flex items-center gap-1">
+          <button class="px-3 py-1.5 rounded-lg border border-[#DADADA] text-xs text-[#575756] hover:bg-[#F2F2F2] transition-colors">Ant</button>
+          <button class="px-3 py-1.5 rounded-lg bg-[#F1E52F] text-[#1C1C1C] text-xs font-bold">1</button>
+          <button class="px-3 py-1.5 rounded-lg border border-[#DADADA] text-xs text-[#575756] hover:bg-[#F2F2F2] transition-colors">2</button>
+          <button class="px-3 py-1.5 rounded-lg border border-[#DADADA] text-xs text-[#575756] hover:bg-[#F2F2F2] transition-colors">3</button>
+          <span class="px-2 text-[#575756] text-xs">...</span>
+          <button class="px-3 py-1.5 rounded-lg border border-[#DADADA] text-xs text-[#575756] hover:bg-[#F2F2F2] transition-colors">85</button>
+          <button class="px-3 py-1.5 rounded-lg border border-[#DADADA] text-xs text-[#575756] hover:bg-[#F2F2F2] transition-colors">Próx</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL: Confirmar Atendimento -->
+  <div id="modal-atender" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeAtenderModal()"></div>
+
+    <!-- Modal card -->
+    <div class="relative bg-white rounded-2xl shadow-xl p-8 w-full max-w-md mx-4">
+      <!-- Icon -->
+      <div class="flex justify-center mb-5">
+        <div class="w-16 h-16 rounded-full bg-[#F1E52F] flex items-center justify-center">
+          <i data-lucide="phone-call" class="w-8 h-8 text-[#1C1C1C]"></i>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h2 class="text-lg font-bold text-[#1C1C1C] text-center mb-2">Confirmar Atendimento</h2>
+      <p class="text-sm text-[#575756] text-center mb-1">Você está prestes a registrar o atendimento do lead:</p>
+      <p id="modal-client-name" class="text-base font-semibold text-[#1C1C1C] text-center mb-6">—</p>
+
+      <p class="text-xs text-[#575756] text-center mb-6 leading-relaxed">
+        Ao confirmar, o lead será marcado como atendido e uma nova aba será aberta com os detalhes do cliente para iniciar o contato.
+      </p>
+
+      <!-- Buttons -->
+      <div class="flex gap-3">
+        <button onclick="closeAtenderModal()" class="flex-1 px-4 py-2.5 rounded-lg border border-[#DADADA] text-sm font-medium text-[#575756] hover:bg-[#F2F2F2] transition-colors">
+          Cancelar
+        </button>
+        <button onclick="confirmarAtendimento()" class="flex-1 px-4 py-2.5 rounded-lg bg-[#F1E52F] text-[#1C1C1C] text-sm font-bold hover:brightness-95 transition-all flex items-center justify-center gap-2">
+          <i data-lucide="phone-call" class="w-4 h-4"></i>
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Init Lucide icons
+    lucide.createIcons();
+
+    // ── Sidebar toggle ──────────────────────────────────────────────
+    let sidebarExpanded = true;
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const logoExpanded = document.getElementById('logo-expanded');
+      const logoCompact = document.getElementById('logo-compact');
+      const toggleIcon = document.getElementById('toggle-icon');
+      const toggleLabel = document.getElementById('toggle-label');
+      const navLabels = document.querySelectorAll('.nav-label');
+
+      sidebarExpanded = !sidebarExpanded;
+
+      if (sidebarExpanded) {
+        sidebar.style.width = '260px';
+        logoExpanded.classList.remove('hidden');
+        logoCompact.classList.add('hidden');
+        toggleLabel.textContent = 'Recolher';
+        navLabels.forEach(el => {
+          el.style.maxWidth = '200px';
+          el.style.opacity = '1';
+        });
+        toggleIcon.setAttribute('data-lucide', 'panel-left-close');
+      } else {
+        sidebar.style.width = '72px';
+        logoExpanded.classList.add('hidden');
+        logoCompact.classList.remove('hidden');
+        navLabels.forEach(el => {
+          el.style.maxWidth = '0';
+          el.style.opacity = '0';
+        });
+        toggleIcon.setAttribute('data-lucide', 'panel-left-open');
+      }
+
+      lucide.createIcons();
+    }
+
+    // ── Modal functions ─────────────────────────────────────────────
+    let currentClient = '';
+
+    function openAtenderModal(clientName) {
+      currentClient = clientName;
+      document.getElementById('modal-client-name').textContent = clientName;
+      document.getElementById('modal-atender').classList.remove('hidden');
+    }
+
+    function closeAtenderModal() {
+      document.getElementById('modal-atender').classList.add('hidden');
+      currentClient = '';
+    }
+
+    function confirmarAtendimento() {
+      closeAtenderModal();
+      window.open('#', '_blank');
+      alert('Atendimento registrado para: ' + currentClient);
+    }
+
+    // ── Close all open dropdowns ────────────────────────────────────
+    let activeDropdown = null;
+
+    function closeAllDropdowns() {
+      document.querySelectorAll('.ms-panel.open').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.ms-trigger.open').forEach(t => t.classList.remove('open'));
+      document.querySelectorAll('.drp-panel.open').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.drp-trigger.open').forEach(t => t.classList.remove('open'));
+      activeDropdown = null;
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.ms-trigger') && !e.target.closest('.ms-panel') &&
+          !e.target.closest('.drp-trigger') && !e.target.closest('.drp-panel')) {
+        closeAllDropdowns();
+      }
+    });
+
+    // ── Multi-Select Component ──────────────────────────────────────
+    function createMultiSelect(containerId, options, placeholder, label) {
+      const container = document.getElementById(containerId);
+      const selected = new Set();
+      const id = containerId;
+
+      // Build HTML
+      container.innerHTML = `
+        <label class="filter-label">${label}</label>
+        <button type="button" class="ms-trigger" id="${id}-trigger" tabindex="0">
+          <span class="trigger-text placeholder">${placeholder}</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#575756" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="ms-panel" id="${id}-panel">
+          <div style="position:relative;">
+            <svg style="position:absolute;left:0.625rem;top:50%;transform:translateY(-50%);pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" class="ms-search" placeholder="Buscar..." id="${id}-search">
+          </div>
+          <div class="ms-actions">
+            <a id="${id}-select-all">Selecionar todos</a>
+            <a id="${id}-clear">Limpar</a>
+          </div>
+          <div class="ms-list" id="${id}-list"></div>
+        </div>
+      `;
+
+      const trigger = document.getElementById(`${id}-trigger`);
+      const panel = document.getElementById(`${id}-panel`);
+      const list = document.getElementById(`${id}-list`);
+      const search = document.getElementById(`${id}-search`);
+      const triggerText = trigger.querySelector('.trigger-text');
+
+      function renderOptions(filter) {
+        const q = (filter || '').toLowerCase();
+        list.innerHTML = '';
+        options.forEach((opt, i) => {
+          if (q && !opt.label.toLowerCase().includes(q)) return;
+          const div = document.createElement('label');
+          div.className = 'ms-option';
+          div.innerHTML = `<input type="checkbox" data-value="${opt.value}" ${selected.has(opt.value) ? 'checked' : ''}><span>${opt.label}</span>`;
+          div.querySelector('input').addEventListener('change', function() {
+            if (this.checked) selected.add(opt.value);
+            else selected.delete(opt.value);
+            updateTrigger();
+          });
+          list.appendChild(div);
+        });
+      }
+
+      function updateTrigger() {
+        if (selected.size === 0) {
+          triggerText.className = 'trigger-text placeholder';
+          triggerText.textContent = placeholder;
+        } else if (selected.size <= 2) {
+          triggerText.className = 'trigger-text';
+          const names = [];
+          options.forEach(o => { if (selected.has(o.value)) names.push(o.label); });
+          triggerText.innerHTML = names.map(n => `<span class="ms-pill">${n}</span>`).join(' ');
+        } else {
+          triggerText.className = 'trigger-text';
+          triggerText.innerHTML = `<span class="ms-pill">${selected.size} selecionados</span>`;
+        }
+      }
+
+      trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isOpen = panel.classList.contains('open');
+        closeAllDropdowns();
+        if (!isOpen) {
+          panel.classList.add('open');
+          trigger.classList.add('open');
+          activeDropdown = id;
+          search.value = '';
+          renderOptions('');
+          setTimeout(() => search.focus(), 50);
+        }
+      });
+
+      search.addEventListener('input', function() { renderOptions(this.value); });
+      search.addEventListener('click', function(e) { e.stopPropagation(); });
+
+      document.getElementById(`${id}-select-all`).addEventListener('click', function(e) {
+        e.stopPropagation();
+        options.forEach(o => selected.add(o.value));
+        renderOptions(search.value);
+        updateTrigger();
+      });
+
+      document.getElementById(`${id}-clear`).addEventListener('click', function(e) {
+        e.stopPropagation();
+        selected.clear();
+        renderOptions(search.value);
+        updateTrigger();
+      });
+
+      renderOptions('');
+    }
+
+    // ── Date Range Picker Component ─────────────────────────────────
+    function createDateRangePicker(containerId, label) {
+      const container = document.getElementById(containerId);
+      const id = containerId;
+
+      let currentMonth = 2; // March (0-indexed)
+      let currentYear = 2026;
+      let startDate = new Date(2026, 2, 1);
+      let endDate = new Date(2026, 2, 31);
+      let pickState = 0; // 0 = pick start, 1 = pick end
+
+      const monthNames = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+      container.innerHTML = `
+        <label class="filter-label">${label}</label>
+        <button type="button" class="drp-trigger" id="${id}-trigger" tabindex="0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#575756" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span id="${id}-display">01/03/2026 — 31/03/2026</span>
+          <svg class="chevron" style="margin-left:auto;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#575756" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="drp-panel" id="${id}-panel">
+          <div class="drp-header">
+            <button type="button" id="${id}-prev">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <span id="${id}-month-label"></span>
+            <button type="button" id="${id}-next">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+          <div class="drp-weekdays">
+            <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+          </div>
+          <div class="drp-days" id="${id}-days"></div>
+          <div class="drp-footer">
+            <button type="button" class="btn-clear" id="${id}-clear">Limpar</button>
+            <button type="button" class="btn-apply" id="${id}-apply">Aplicar</button>
+          </div>
+        </div>
+      `;
+
+      const trigger = document.getElementById(`${id}-trigger`);
+      const panel = document.getElementById(`${id}-panel`);
+      const display = document.getElementById(`${id}-display`);
+      const daysContainer = document.getElementById(`${id}-days`);
+      const monthLabel = document.getElementById(`${id}-month-label`);
+
+      function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+      function formatDate(d) {
+        return d ? pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() : '';
+      }
+
+      function sameDay(a, b) {
+        return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+      }
+
+      function inRange(d) {
+        if (!startDate || !endDate || !d) return false;
+        return d >= startDate && d <= endDate;
+      }
+
+      function renderCalendar() {
+        monthLabel.textContent = monthNames[currentMonth] + ' ' + currentYear;
+        daysContainer.innerHTML = '';
+        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const today = new Date();
+
+        // Empty cells for days before the 1st
+        for (let i = 0; i < firstDay; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'drp-day empty';
+          daysContainer.appendChild(cell);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const cell = document.createElement('div');
+          cell.className = 'drp-day';
+          cell.textContent = day;
+          const d = new Date(currentYear, currentMonth, day);
+
+          if (sameDay(d, today)) cell.classList.add('today');
+          if (sameDay(d, startDate)) cell.classList.add('start');
+          if (sameDay(d, endDate)) cell.classList.add('end');
+          if (startDate && endDate && inRange(d) && !sameDay(d, startDate) && !sameDay(d, endDate)) {
+            cell.classList.add('in-range');
+          }
+
+          cell.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (pickState === 0) {
+              startDate = d;
+              endDate = null;
+              pickState = 1;
+            } else {
+              if (d < startDate) {
+                endDate = startDate;
+                startDate = d;
+              } else {
+                endDate = d;
+              }
+              pickState = 0;
+            }
+            renderCalendar();
+          });
+
+          daysContainer.appendChild(cell);
+        }
+      }
+
+      function updateDisplay() {
+        if (startDate && endDate) {
+          display.textContent = formatDate(startDate) + ' \u2014 ' + formatDate(endDate);
+        } else if (startDate) {
+          display.textContent = formatDate(startDate) + ' \u2014 ...';
+        } else {
+          display.textContent = 'Selecione o periodo';
+          display.style.color = '#9ca3af';
+        }
+      }
+
+      trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isOpen = panel.classList.contains('open');
+        closeAllDropdowns();
+        if (!isOpen) {
+          panel.classList.add('open');
+          trigger.classList.add('open');
+          activeDropdown = id;
+          renderCalendar();
+        }
+      });
+
+      document.getElementById(`${id}-prev`).addEventListener('click', function(e) {
+        e.stopPropagation();
+        currentMonth--;
+        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+        renderCalendar();
+      });
+
+      document.getElementById(`${id}-next`).addEventListener('click', function(e) {
+        e.stopPropagation();
+        currentMonth++;
+        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+        renderCalendar();
+      });
+
+      document.getElementById(`${id}-clear`).addEventListener('click', function(e) {
+        e.stopPropagation();
+        startDate = null; endDate = null; pickState = 0;
+        renderCalendar();
+        updateDisplay();
+      });
+
+      document.getElementById(`${id}-apply`).addEventListener('click', function(e) {
+        e.stopPropagation();
+        updateDisplay();
+        closeAllDropdowns();
+      });
+
+      updateDisplay();
+      renderCalendar();
+    }
+
+    // ── Initialize filter components ────────────────────────────────
+    createMultiSelect('ms-empresa', [
+      { value: 'EMP001', label: 'EMP001 - NutriVida' },
+      { value: 'EMP002', label: 'EMP002 - BelezaPura' },
+      { value: 'EMP003', label: 'EMP003 - FitMax' },
+      { value: 'EMP004', label: 'EMP004 - DermaPlus' }
+    ], 'Todas', 'Empresa');
+
+    createMultiSelect('ms-tipo-lead', [
+      { value: 'cartoes_aprovados_kits', label: 'Cartoes Aprovados KITS Site' },
+      { value: 'cartoes_aprovados_amostras', label: 'Cartoes Aprovados AMOSTRAS Site' },
+      { value: 'abandonos_site', label: 'Abandonos Site' },
+      { value: 'pix_pagos_site', label: 'Pix Pagos Site' },
+      { value: 'pix_pendentes_site', label: 'Pix Pendentes Site' },
+      { value: 'boletos_pagos_site', label: 'Boletos Pagos Site' },
+      { value: 'boletos_pendentes_site', label: 'Boletos Pendentes Site' },
+      { value: 'cartao_recusado_kit', label: 'Cartao Recusado KIT Site' },
+      { value: 'cartao_recusado_saldo', label: 'Cartao Recusado Falta de Saldo' }
+    ], 'Todos', 'Tipo de Lead');
+
+    createMultiSelect('ms-valor', [
+      { value: 'ate_100', label: 'Ate R$100' },
+      { value: '100_300', label: 'R$100 - R$300' },
+      { value: '300_500', label: 'R$300 - R$500' },
+      { value: 'acima_500', label: 'Acima de R$500' }
+    ], 'Todos', 'Valor');
+
+    createDateRangePicker('drp-periodo', 'Periodo');
+  </script>
+</body>
+</html>

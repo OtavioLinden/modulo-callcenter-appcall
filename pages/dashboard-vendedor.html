@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Vendedor | AppCall - Pagah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { ubuntu: ['Ubuntu', 'sans-serif'] } } }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Ubuntu', sans-serif; }
+
+    /* Date range picker */
+    .drp-trigger { position: relative; }
+    .drp-dropdown {
+      position: absolute; top: calc(100% + 6px); right: 0; z-index: 30;
+      background: #fff; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.15);
+      width: 320px; padding: 16px; user-select: none;
+    }
+    .drp-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .drp-nav button { background: none; border: none; cursor: pointer; padding: 4px; border-radius: 6px; color: #575756; }
+    .drp-nav button:hover { background: #F2F2F2; }
+    .drp-nav span { font-weight: 600; font-size: 14px; color: #1C1C1C; }
+    .drp-weekdays { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; font-size: 11px; color: #575756; font-weight: 600; margin-bottom: 4px; }
+    .drp-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+    .drp-day {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px; font-size: 13px;
+      cursor: pointer; color: #1C1C1C; transition: background .15s;
+    }
+    .drp-day:hover { background: #F2F2F2; }
+    .drp-day.empty { cursor: default; }
+    .drp-day.empty:hover { background: transparent; }
+    .drp-day.today { font-weight: 700; }
+    .drp-day.range-start, .drp-day.range-end { background: #F1E52F !important; font-weight: 700; color: #1C1C1C; }
+    .drp-day.in-range { background: #F1E52F33; }
+    .drp-day.other-month { color: #DADADA; }
+    .drp-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #F2F2F2; }
+    .drp-actions button { padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+    .drp-actions .btn-clear { background: #F2F2F2; color: #575756; }
+    .drp-actions .btn-clear:hover { background: #DADADA; }
+    .drp-actions .btn-apply { background: #F1E52F; color: #1C1C1C; }
+    .drp-actions .btn-apply:hover { filter: brightness(.95); }
+
+    /* Multi-select */
+    .ms-container { position: relative; }
+    .ms-trigger {
+      display: flex; align-items: center; gap: 6px; border: 1px solid #DADADA; border-radius: 8px;
+      padding: 7px 12px; background: #fff; cursor: pointer; font-size: 14px; color: #1C1C1C;
+      min-width: 180px; transition: border-color .15s, box-shadow .15s;
+    }
+    .ms-trigger:focus, .ms-trigger.open {
+      border-color: #F1E52F; box-shadow: 0 0 0 3px rgba(241,229,47,.2); outline: none;
+    }
+    .ms-trigger .ms-pills { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; align-items: center; }
+    .ms-trigger .ms-pill {
+      background: #F2F2F2; color: #1C1C1C; font-size: 12px; border-radius: 9999px;
+      padding: 1px 8px; white-space: nowrap; font-weight: 500;
+    }
+    .ms-trigger .ms-placeholder { color: #575756; font-size: 14px; }
+    .ms-trigger .ms-chevron { margin-left: auto; flex-shrink: 0; transition: transform .2s; color: #575756; }
+    .ms-trigger.open .ms-chevron { transform: rotate(180deg); }
+    .ms-dropdown {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30;
+      background: #fff; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,.15);
+      padding: 8px; min-width: 240px;
+    }
+    .ms-dropdown .ms-search {
+      width: 100%; border: 1px solid #DADADA; border-radius: 8px; padding: 7px 10px;
+      font-size: 13px; margin-bottom: 6px; outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .ms-dropdown .ms-search:focus { border-color: #F1E52F; box-shadow: 0 0 0 3px rgba(241,229,47,.2); }
+    .ms-dropdown .ms-links { display: flex; justify-content: space-between; padding: 4px 4px 8px; font-size: 12px; }
+    .ms-dropdown .ms-links a { color: #575756; cursor: pointer; font-weight: 600; text-decoration: none; }
+    .ms-dropdown .ms-links a:hover { color: #1C1C1C; }
+    .ms-dropdown .ms-list { max-height: 192px; overflow-y: auto; }
+    .ms-dropdown .ms-option {
+      display: flex; align-items: center; gap: 8px; padding: 7px 8px;
+      border-radius: 6px; cursor: pointer; font-size: 13px; color: #1C1C1C;
+    }
+    .ms-dropdown .ms-option:hover { background: #F2F2F2; }
+    .ms-dropdown .ms-option input[type="checkbox"] { accent-color: #F1E52F; width: 16px; height: 16px; cursor: pointer; }
+    .ms-dropdown .ms-option.hidden-opt { display: none; }
+
+    /* Label styling for filter labels */
+    .filter-label { font-size: 11px; font-weight: 600; color: #575756; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  </style>
+</head>
+<body class="bg-[#F2F2F2] flex h-screen overflow-hidden">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="bg-white flex flex-col border-r border-[#DADADA] transition-all duration-300 h-screen flex-shrink-0" style="width:260px;">
+
+    <!-- Logo area -->
+    <div class="flex items-center px-4 py-5 border-b border-[#DADADA]" style="min-height:72px;">
+      <img id="logo-expanded" src="../assets/pagcall/logo/svg/Logo-alternativo.svg" alt="PagCall" class="h-8 object-contain transition-all duration-300">
+      <img id="logo-compact" src="../assets/pagcall/logo/svg/Icone.svg" alt="PagCall" class="h-8 object-contain transition-all duration-300 hidden">
+    </div>
+
+    <!-- Nav items -->
+    <nav class="flex-1 py-4 flex flex-col gap-1 px-2 overflow-hidden">
+
+      <!-- Dashboard (ACTIVE) -->
+      <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#F2F2F2] text-[#1C1C1C] font-semibold border-r-[3px] border-[#F1E52F] transition-colors group">
+        <span class="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        </span>
+        <span class="nav-label text-sm whitespace-nowrap overflow-hidden transition-all duration-300">Dashboard</span>
+      </a>
+
+      <!-- Leads / Atendimento (inactive) -->
+      <a href="leads-atendimento.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
+        <span class="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+          <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+        </span>
+        <span class="nav-label text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300">Leads / Atendimento</span>
+      </a>
+
+    </nav>
+
+    <!-- Toggle button -->
+    <div class="border-t border-[#DADADA] p-3">
+      <button onclick="toggleSidebar()" class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors">
+        <i id="toggle-icon" data-lucide="panel-left-close" class="w-4 h-4 flex-shrink-0"></i>
+        <span id="toggle-label" class="nav-label text-xs whitespace-nowrap overflow-hidden transition-all duration-300">Recolher</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- Yellow strip header -->
+    <header class="h-2 bg-[#F1E52F] flex-shrink-0"></header>
+
+    <!-- Page header bar -->
+    <div class="bg-white border-b border-[#DADADA] px-6 py-3 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <i data-lucide="layout-dashboard" class="w-5 h-5 text-[#575756]"></i>
+        <h1 class="text-base font-semibold text-[#1C1C1C]">Dashboard Vendedor</h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="drp-trigger" id="drp-container">
+          <button id="drp-trigger-btn" type="button" class="flex items-center gap-2 border border-[#DADADA] rounded-lg px-3 py-2 text-sm text-[#575756] bg-white hover:border-[#F1E52F] focus:border-[#F1E52F] focus:ring-2 focus:ring-[#F1E52F]/20 transition-all cursor-pointer" onclick="toggleDatePicker()">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            <span id="drp-label">01/03/2026 — 31/03/2026</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 ml-1"></i>
+          </button>
+          <div id="drp-dropdown" class="drp-dropdown hidden">
+            <div class="drp-nav">
+              <button onclick="drpPrevMonth()" title="Mes anterior"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+              <span id="drp-month-label"></span>
+              <button onclick="drpNextMonth()" title="Proximo mes"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            </div>
+            <div class="drp-weekdays">
+              <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+            </div>
+            <div id="drp-days" class="drp-days"></div>
+            <div class="drp-actions">
+              <button class="btn-clear" onclick="drpClear()">Limpar</button>
+              <button class="btn-apply" onclick="drpApply()">Aplicar</button>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <p class="text-xs font-semibold text-[#1C1C1C]">Vendedor: Joao Silva</p>
+            <p class="text-xs text-[#575756]">Vendedor · EMP001</p>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-[#F1E52F] flex items-center justify-center">
+            <span class="text-xs font-bold text-[#1C1C1C]">JS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrollable content -->
+    <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+      <!-- ===== SECTION 1: Resultados Financeiros ===== -->
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <span class="text-xs font-bold text-[#575756] uppercase tracking-wider">Resultados Financeiros</span>
+          <div class="flex-1 h-px bg-[#DADADA]"></div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-4">
+
+          <!-- Card 1: Comissao Liquida (DARK, col-span-5) -->
+          <div onclick="openModal('modal-comissao')" class="col-span-5 bg-[#1C1C1C] rounded-xl shadow-sm p-5 border-l-4 border-[#F1E52F] cursor-pointer hover:brightness-110 transition-all">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-gray-400">Sua Comissao Liquida</span>
+              <i data-lucide="external-link" class="w-4 h-4 text-gray-400"></i>
+            </div>
+            <p class="text-[#F1E52F] font-bold" style="font-size:2rem;">R$ 12.450,00</p>
+            <p class="text-xs text-gray-400 mt-1">87 transacoes aprovadas &middot; Clique para ver detalhes</p>
+          </div>
+
+          <!-- Card 2: Vendas Aprovadas (col-span-4) -->
+          <div class="col-span-4 bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
+            <span class="text-xs text-green-600 font-medium">Vendas Aprovadas</span>
+            <p class="text-[#1C1C1C] font-bold text-2xl mt-1">R$ 145.200,00</p>
+            <p class="text-xs text-[#575756] mt-1">152 vendas realizadas</p>
+          </div>
+
+          <!-- Card 3: Aguardando Pagto (col-span-3) -->
+          <div class="col-span-3 bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
+            <span class="text-xs text-blue-600 font-medium">Aguardando Pagto</span>
+            <p class="text-[#1C1C1C] font-bold text-2xl mt-1">R$ 4.500,00</p>
+            <p class="text-xs text-[#575756] mt-1">12 pedidos pendentes</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== SECTION 2: Debitos ===== -->
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-[#575756]"></i>
+          <span class="text-xs font-bold text-[#575756] uppercase tracking-wider">Debitos</span>
+          <div class="flex-1 h-px bg-[#DADADA]"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+
+          <!-- Card 1: Debitos do Periodo -->
+          <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-gray-400">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs text-[#575756] font-medium">Debitos do Periodo</span>
+              <i data-lucide="info" class="w-3.5 h-3.5 text-gray-400 cursor-help" title="Debitos referentes ao periodo selecionado"></i>
+            </div>
+            <p class="text-gray-500 font-bold text-2xl">- R$ 1.340,00</p>
+            <p class="text-xs text-[#575756] mt-1">5 ocorrencias (3 estornos + 2 CB)</p>
+          </div>
+
+          <!-- Card 2: Debitos Retroativos -->
+          <div class="bg-red-50 rounded-xl shadow-sm p-5 border-l-4 border-red-500">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs text-red-600 font-medium">Debitos Retroativos</span>
+              <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-red-400"></i>
+            </div>
+            <p class="text-red-600 font-bold text-2xl">- R$ 1.400,00</p>
+            <p class="text-xs text-[#575756] mt-1">4 ocorrencias (1 estorno + 3 CB)</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== SECTION 3: Resultados da Semana ===== -->
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <i data-lucide="calendar" class="w-4 h-4 text-[#575756]"></i>
+          <span class="text-xs font-bold text-[#575756] uppercase tracking-wider">Resultados da Semana</span>
+          <div class="flex-1 h-px bg-[#DADADA]"></div>
+        </div>
+
+        <!-- Label badges -->
+        <div class="flex items-center gap-2 mb-4">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#1C1C1C] text-[#F1E52F]">SEUS RESULTADOS</span>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-600 text-white">EQUIPE</span>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4">
+
+          <!-- Card 1: Seu Ticket Medio -->
+          <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-orange-400 relative" style="height:140px;">
+            <span class="absolute top-3 right-3 inline-flex items-center justify-center w-7 h-7 rounded-full bg-orange-100 text-orange-600 text-xs font-bold">3o</span>
+            <span class="text-xs text-[#575756] font-medium">Seu Ticket Medio</span>
+            <p class="text-[#1C1C1C] font-bold text-2xl mt-2">R$ 82,42</p>
+            <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-[#575756] border-t border-[#F2F2F2] pt-2">
+              <span>Lider: R$ 557,83</span>
+              <span class="text-red-500 font-medium">-R$ 475,41</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Seu Total Bonus -->
+          <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-green-500 relative" style="height:140px;">
+            <span class="absolute top-3 right-3 inline-flex items-center justify-center w-7 h-7 rounded-full bg-green-100 text-green-600 text-xs font-bold">5o</span>
+            <span class="text-xs text-[#575756] font-medium">Seu Total Bonus</span>
+            <p class="text-[#1C1C1C] font-bold text-2xl mt-2">R$ 350,00</p>
+            <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-[#575756] border-t border-[#F2F2F2] pt-2">
+              <span>Lider: R$ 600</span>
+              <span class="text-red-500 font-medium">Faltam R$ 250</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Maior Venda (equipe) -->
+          <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-[#F1E52F] relative" style="height:140px;">
+            <span class="absolute top-3 right-3 inline-flex items-center px-2 py-0.5 rounded-full bg-[#F1E52F] text-[#1C1C1C] text-xs font-bold">TOP</span>
+            <span class="text-xs text-[#575756] font-medium">Maior Venda</span>
+            <p class="text-[#1C1C1C] font-bold text-2xl mt-2">R$ 1.297,00</p>
+            <div class="absolute bottom-3 left-4 right-4 text-xs text-[#575756] border-t border-[#F2F2F2] pt-2">
+              <div class="flex items-center justify-between">
+                <span>Eduardo Call &middot; 14/01</span>
+                <span class="text-red-500 font-medium">Sua maior: R$ 450 (-R$ 847)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Bonus Batidos (equipe) -->
+          <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-red-500 relative" style="height:140px;">
+            <span class="absolute top-3 right-3 inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-100 text-red-600 text-xs font-bold">6</span>
+            <span class="text-xs text-[#575756] font-medium">Bonus Batidos</span>
+            <div class="mt-2 space-y-1 text-xs">
+              <p class="text-[#1C1C1C]"><span class="font-bold">1.</span> Ramon R$600</p>
+              <p class="text-[#1C1C1C]"><span class="font-bold">2.</span> Marcos R$450</p>
+            </div>
+            <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs border-t border-[#F2F2F2] pt-2">
+              <span class="text-[#575756]">Voce: 5o lugar</span>
+              <button onclick="openModal('modal-bonus')" class="text-blue-600 font-medium hover:underline">Ver todos &rarr;</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== SECTION 4: Ranking de Vendedores ===== -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+
+        <!-- Ranking header -->
+        <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <i data-lucide="star" class="w-5 h-5 text-blue-600"></i>
+            <h2 class="text-base font-bold text-[#1C1C1C]">Ranking de Vendedores</h2>
+          </div>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#1C1C1C] text-[#F1E52F]">Marco 2026</span>
+        </div>
+
+        <!-- Ranking table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-[#1C1C1C] text-white text-xs uppercase">
+                <th class="px-4 py-3 text-center font-semibold tracking-wide w-12">#</th>
+                <th class="px-4 py-3 text-left font-semibold tracking-wide">Vendedor</th>
+                <th class="px-4 py-3 text-right font-semibold tracking-wide">Total Vendido</th>
+                <th class="px-4 py-3 text-center font-semibold tracking-wide">Pedidos</th>
+                <th class="px-4 py-3 text-right font-semibold tracking-wide">Ticket Medio</th>
+                <th class="px-4 py-3 text-center font-semibold tracking-wide">Bonus do Mes</th>
+                <th class="px-4 py-3 text-center font-semibold tracking-wide">Conversao</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#F2F2F2]">
+
+              <!-- 1st - Flavio Call -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-1">
+                    <i data-lucide="crown" class="w-4 h-4 text-yellow-500"></i>
+                    <span class="font-bold text-yellow-600">1</span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Flavio Call</td>
+                <td class="px-4 py-3 text-right font-bold text-green-600">R$ 4.442,62</td>
+                <td class="px-4 py-3 text-center text-[#575756]">8</td>
+                <td class="px-4 py-3 text-right text-[#575756]">R$ 555,33</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">R$ 300</span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-[60px] h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" style="width:78%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">12.70%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- 2nd - Andrey Call -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-1">
+                    <i data-lucide="medal" class="w-4 h-4 text-gray-400"></i>
+                    <span class="font-bold text-gray-500">2</span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Andrey Call</td>
+                <td class="px-4 py-3 text-right font-bold text-[#1C1C1C]">R$ 4.177,60</td>
+                <td class="px-4 py-3 text-center text-[#575756]">6</td>
+                <td class="px-4 py-3 text-right text-[#575756]">R$ 696,27</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">R$ 100</span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-[60px] h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" style="width:100%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">16.22%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- 3rd - Romon Call -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-1">
+                    <i data-lucide="medal" class="w-4 h-4 text-amber-700"></i>
+                    <span class="font-bold text-amber-700">3</span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Romon Call</td>
+                <td class="px-4 py-3 text-right font-bold text-[#1C1C1C]">R$ 2.981,84</td>
+                <td class="px-4 py-3 text-center text-[#575756]">5</td>
+                <td class="px-4 py-3 text-right text-[#575756]">R$ 596,37</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500">R$ 0</span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-[60px] h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" style="width:62%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">10.00%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- 4th - VOCE Joao Silva (highlighted) -->
+              <tr class="bg-yellow-50 hover:bg-yellow-100 transition-colors border-l-4 border-[#F1E52F]">
+                <td class="px-4 py-3 text-center">
+                  <span class="font-bold text-[#1C1C1C]">4</span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-[#F1E52F] text-[#1C1C1C]">VOCE</span>
+                    <span class="font-medium text-[#1C1C1C]">Joao Silva</span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-right font-bold text-[#1C1C1C]">R$ 2.335,10</td>
+                <td class="px-4 py-3 text-center text-[#575756]">5</td>
+                <td class="px-4 py-3 text-right text-[#575756]">R$ 467,02</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500">R$ 0</span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-[60px] h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" style="width:75%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">12.20%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- 5th - Eduardo Call -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <span class="font-bold text-[#575756]">5</span>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Eduardo Call</td>
+                <td class="px-4 py-3 text-right font-bold text-[#1C1C1C]">R$ 1.681,82</td>
+                <td class="px-4 py-3 text-center text-[#575756]">4</td>
+                <td class="px-4 py-3 text-right text-[#575756]">R$ 420,46</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500">R$ 0</span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-[60px] h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" style="width:62%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">10.00%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- 6th - Gustavo Call -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <span class="font-bold text-[#575756]">6</span>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Gustavo Call</td>
+                <td class="px-4 py-3 text-right font-bold text-[#1C1C1C]">R$ 1.291,87</td>
+                <td class="px-4 py-3 text-center text-[#575756]">4</td>
+                <td class="px-4 py-3 text-right text-[#575756]">R$ 322,97</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500">R$ 0</span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-[60px] h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" style="width:68%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">11.00%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- 7th - Paula Call -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <span class="font-bold text-[#575756]">7</span>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Paula Call</td>
+                <td class="px-4 py-3 text-right font-bold text-[#1C1C1C]">R$ 1.176,72</td>
+                <td class="px-4 py-3 text-center text-[#575756]">2</td>
+                <td class="px-4 py-3 text-right text-[#575756]">R$ 588,36</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500">R$ 0</span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-[60px] h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" style="width:51%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">8.33%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- 8th - Anderson Call -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <span class="font-bold text-[#575756]">8</span>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Anderson Call</td>
+                <td class="px-4 py-3 text-right font-bold text-[#1C1C1C]">R$ 535,34</td>
+                <td class="px-4 py-3 text-center text-[#575756]">2</td>
+                <td class="px-4 py-3 text-right text-[#575756]">R$ 267,67</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500">R$ 0</span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-[60px] h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" style="width:51%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">8.33%</span>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== SECTION 5: Detalhamento ===== -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+
+        <!-- Toolbar -->
+        <div class="px-6 py-4 border-b border-[#DADADA] flex items-center justify-between flex-wrap gap-3">
+          <h2 class="text-base font-bold text-[#1C1C1C]">Detalhamento</h2>
+          <div class="flex items-center gap-3 flex-wrap">
+            <div>
+              <div class="filter-label">Empresa</div>
+              <div id="ms-empresa" class="ms-container"></div>
+            </div>
+            <div>
+              <div class="filter-label">Metodo</div>
+              <div id="ms-metodo" class="ms-container"></div>
+            </div>
+            <div>
+              <div class="filter-label">Buscar</div>
+              <input type="text" placeholder="Nome, CPF, pedido..." class="border border-[#DADADA] rounded-lg px-3 py-2 text-sm text-[#1C1C1C] w-56 focus:outline-none focus:border-[#F1E52F] focus:ring-2 focus:ring-[#F1E52F]/20 transition-all" style="height:38px;">
+            </div>
+            <div class="self-end">
+              <button class="flex items-center gap-2 px-4 py-2 bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-sm hover:brightness-95 transition-all" style="height:38px;">
+                <i data-lucide="search" class="w-4 h-4"></i>
+                Filtrar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="border-b border-[#DADADA] px-6 flex">
+          <button onclick="switchTab('tab-extrato')" id="btn-tab-extrato" class="tab-btn px-4 py-3 text-sm font-semibold border-b-2 border-[#F1E52F] text-[#1C1C1C]">Extrato de Vendas</button>
+          <button onclick="switchTab('tab-ocorrencias')" id="btn-tab-ocorrencias" class="tab-btn px-4 py-3 text-sm font-medium text-[#575756] border-b-2 border-transparent hover:text-[#1C1C1C] transition-colors">Ocorrencias (Periodo)</button>
+          <button onclick="switchTab('tab-retroativos')" id="btn-tab-retroativos" class="tab-btn px-4 py-3 text-sm font-medium text-red-500 border-b-2 border-transparent hover:text-red-700 transition-colors flex items-center gap-2">
+            Retroativos
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold">4</span>
+          </button>
+        </div>
+
+        <!-- TAB 1: Extrato de Vendas -->
+        <div id="tab-extrato" class="tab-content">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-[#1C1C1C] text-white text-xs uppercase">
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">ID Empresa</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">ID Pedido</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Data</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Cliente / CPF</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Origem</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Telefone</th>
+                  <th class="px-4 py-3 text-center font-semibold tracking-wide">Metodo</th>
+                  <th class="px-4 py-3 text-center font-semibold tracking-wide">Status</th>
+                  <th class="px-4 py-3 text-right font-semibold tracking-wide">Valor Venda</th>
+                  <th class="px-4 py-3 text-right font-semibold tracking-wide">Comissao</th>
+                  <th class="px-4 py-3 text-center font-semibold tracking-wide">Acoes</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#F2F2F2]">
+
+                <!-- Extrato Row 1 -->
+                <tr class="hover:bg-[#FAFAFA] transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#34521</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">28/03/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Maria Oliveira</p>
+                      <p class="text-[#575756]">123.456.789-00</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">Upsell</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">(11) 98765-1234</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Cartao</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">Aprovado</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 297,00</td>
+                  <td class="px-4 py-3 text-right text-green-600 font-medium">R$ 11,88</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Extrato Row 2 -->
+                <tr class="hover:bg-[#FAFAFA] transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP002</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#34518</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">27/03/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Carlos Souza</p>
+                      <p class="text-[#575756]">987.654.321-00</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Recup</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">(21) 97654-3210</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">Pix</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">Aprovado</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 450,00</td>
+                  <td class="px-4 py-3 text-right text-green-600 font-medium">R$ 18,00</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Extrato Row 3 -->
+                <tr class="hover:bg-[#FAFAFA] transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#34510</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">26/03/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Ana Paula Lima</p>
+                      <p class="text-[#575756]">456.789.123-00</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">Upsell</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">(31) 99876-5432</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Cartao</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Pendente</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 189,90</td>
+                  <td class="px-4 py-3 text-right text-[#575756]">R$ 7,60</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Extrato Row 4 -->
+                <tr class="hover:bg-[#FAFAFA] transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP003</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#34498</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">25/03/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Roberto Almeida</p>
+                      <p class="text-[#575756]">321.654.987-00</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Recup</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">(41) 98765-6789</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">Boleto</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Cancelado</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 597,00</td>
+                  <td class="px-4 py-3 text-right text-red-500 line-through">R$ 23,88</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Extrato Row 5 -->
+                <tr class="hover:bg-[#FAFAFA] transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#34490</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">24/03/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Fernanda Costa</p>
+                      <p class="text-[#575756]">654.321.987-00</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">Upsell</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">(51) 99876-1234</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">Pix</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">Aprovado</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 350,00</td>
+                  <td class="px-4 py-3 text-right text-green-600 font-medium">R$ 14,00</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 2: Ocorrencias (Periodo) -->
+        <div id="tab-ocorrencias" class="tab-content hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-[#1C1C1C] text-white text-xs uppercase">
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">ID Empresa</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">ID Pedido</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Data</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Cliente / CPF</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Tipo</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Motivo</th>
+                  <th class="px-4 py-3 text-center font-semibold tracking-wide">Metodo</th>
+                  <th class="px-4 py-3 text-center font-semibold tracking-wide">Status</th>
+                  <th class="px-4 py-3 text-right font-semibold tracking-wide">Valor Venda</th>
+                  <th class="px-4 py-3 text-right font-semibold tracking-wide">Debito</th>
+                  <th class="px-4 py-3 text-center font-semibold tracking-wide">Acoes</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#F2F2F2]">
+
+                <!-- Ocorrencia Row 1 -->
+                <tr class="hover:bg-[#FAFAFA] transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#33210</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">22/03/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Pedro Santos</p>
+                      <p class="text-[#575756]">111.222.333-44</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Estorno</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">Cliente solicitou cancelamento</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Cartao</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Estornado</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 297,00</td>
+                  <td class="px-4 py-3 text-right text-red-600 font-medium">- R$ 297,00</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Ocorrencia Row 2 -->
+                <tr class="hover:bg-[#FAFAFA] transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP002</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#33180</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">20/03/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Lucia Ferreira</p>
+                      <p class="text-[#575756]">555.666.777-88</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Chargeback</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">Nao reconhece a compra</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Cartao</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">CB Aberto</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 189,90</td>
+                  <td class="px-4 py-3 text-right text-red-600 font-medium">- R$ 189,90</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Ocorrencia Row 3 -->
+                <tr class="hover:bg-[#FAFAFA] transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#33105</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">18/03/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Ricardo Melo</p>
+                      <p class="text-[#575756]">222.333.444-55</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Estorno</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">Produto com defeito</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">Pix</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Estornado</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 350,00</td>
+                  <td class="px-4 py-3 text-right text-red-600 font-medium">- R$ 350,00</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Ocorrencia Row 4 -->
+                <tr class="hover:bg-[#FAFAFA] transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP003</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#33042</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">15/03/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Sandra Nunes</p>
+                      <p class="text-[#575756]">888.999.000-11</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Estorno</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">Desistencia dentro do prazo</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Cartao</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Estornado</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 297,00</td>
+                  <td class="px-4 py-3 text-right text-red-600 font-medium">- R$ 297,00</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Ocorrencia Row 5 -->
+                <tr class="hover:bg-[#FAFAFA] transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#32988</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">12/03/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Marcos Vieira</p>
+                      <p class="text-[#575756]">444.555.666-77</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Chargeback</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">Fraude suspeita</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Cartao</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">CB Aberto</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 206,10</td>
+                  <td class="px-4 py-3 text-right text-red-600 font-medium">- R$ 206,10</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 3: Retroativos -->
+        <div id="tab-retroativos" class="tab-content hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-[#1C1C1C] text-white text-xs uppercase">
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">ID Empresa</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">ID Pedido</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Data Venda</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Cliente / CPF</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Tipo</th>
+                  <th class="px-4 py-3 text-left font-semibold tracking-wide">Motivo</th>
+                  <th class="px-4 py-3 text-center font-semibold tracking-wide">Metodo</th>
+                  <th class="px-4 py-3 text-center font-semibold tracking-wide">Status</th>
+                  <th class="px-4 py-3 text-right font-semibold tracking-wide">Valor Venda</th>
+                  <th class="px-4 py-3 text-right font-semibold tracking-wide">Debito</th>
+                  <th class="px-4 py-3 text-center font-semibold tracking-wide">Acoes</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#F2F2F2]">
+
+                <!-- Retroativo Row 1 -->
+                <tr class="bg-red-50 hover:bg-red-100 transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#29445</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">15/01/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Joana Ribeiro</p>
+                      <p class="text-[#575756]">777.888.999-00</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-200 text-red-800">CB Retroativo</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">Contestacao apos 60 dias</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Cartao</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">CB Retroativo</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 450,00</td>
+                  <td class="px-4 py-3 text-right text-red-600 font-bold">- R$ 450,00</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Retroativo Row 2 -->
+                <tr class="bg-red-50 hover:bg-red-100 transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP002</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#28910</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">08/01/2026</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Thiago Mendes</p>
+                      <p class="text-[#575756]">333.444.555-66</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-200 text-red-800">CB Retroativo</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">Nao reconhece a compra</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Cartao</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">CB Retroativo</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 297,00</td>
+                  <td class="px-4 py-3 text-right text-red-600 font-bold">- R$ 297,00</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Retroativo Row 3 -->
+                <tr class="bg-red-50 hover:bg-red-100 transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP001</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#28330</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">22/12/2025</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Camila Rodrigues</p>
+                      <p class="text-[#575756]">999.000.111-22</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Estorno</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">Direito de arrependimento</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Cartao</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Estornado</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 189,90</td>
+                  <td class="px-4 py-3 text-right text-red-600 font-bold">- R$ 189,90</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Retroativo Row 4 -->
+                <tr class="bg-red-50 hover:bg-red-100 transition-colors">
+                  <td class="px-4 py-3 text-[#575756] font-mono text-xs">EMP003</td>
+                  <td class="px-4 py-3 text-[#1C1C1C] font-mono text-xs">#27880</td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">10/12/2025</td>
+                  <td class="px-4 py-3">
+                    <div class="text-xs">
+                      <p class="font-medium text-[#1C1C1C]">Felipe Barros</p>
+                      <p class="text-[#575756]">666.777.888-99</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-200 text-red-800">CB Retroativo</span>
+                  </td>
+                  <td class="px-4 py-3 text-[#575756] text-xs">Cartao clonado (fraude)</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Cartao</span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">CB Retroativo</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 463,10</td>
+                  <td class="px-4 py-3 text-right text-red-600 font-bold">- R$ 463,10</td>
+                  <td class="px-4 py-3 text-center">
+                    <button class="text-[#575756] hover:text-[#1C1C1C] transition-colors" title="Ver detalhes">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="px-6 py-4 border-t border-[#DADADA] flex items-center justify-between">
+          <span class="text-xs text-[#575756]">Exibindo <strong class="text-[#1C1C1C]">5</strong> de <strong class="text-[#1C1C1C]">152</strong> registros</span>
+          <div class="flex items-center gap-1">
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#F1E52F] text-[#1C1C1C] font-bold text-sm">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors text-sm">2</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors text-sm">3</button>
+            <span class="w-8 h-8 flex items-center justify-center text-[#575756] text-sm">...</span>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors text-sm">31</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ===== MODAL 1: Comissao por Origem ===== -->
+  <div id="modal-comissao" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal('modal-comissao')"></div>
+    <!-- Modal content -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl">
+
+      <!-- Dark header -->
+      <div class="bg-[#1C1C1C] px-6 py-4 flex items-center justify-between rounded-t-xl">
+        <h3 class="text-[#F1E52F] font-bold text-lg">Comissao por Origem de Vendas</h3>
+        <button onclick="closeModal('modal-comissao')" class="text-gray-400 hover:text-white transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Summary section (dark bg) -->
+      <div class="bg-[#1C1C1C] px-6 pb-5">
+        <div class="grid grid-cols-3 gap-4 mb-4">
+          <div class="bg-[#2a2a2a] rounded-lg p-4 text-center">
+            <span class="text-xs text-gray-400 block mb-1">Comissao Bruta</span>
+            <span class="text-white font-bold text-xl">R$ 15.190</span>
+          </div>
+          <div class="bg-[#2a2a2a] rounded-lg p-4 text-center">
+            <span class="text-xs text-gray-400 block mb-1">Total Vendas</span>
+            <span class="text-white font-bold text-xl">R$ 379.750</span>
+          </div>
+          <div class="bg-[#2a2a2a] rounded-lg p-4 text-center">
+            <span class="text-xs text-gray-400 block mb-1">Total Pedidos</span>
+            <span class="text-white font-bold text-xl">152</span>
+          </div>
+        </div>
+
+        <!-- Deduction row -->
+        <div class="border-t border-dashed border-gray-600 pt-4 flex items-center gap-4 flex-wrap text-sm">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400 text-xs">Estornos</span>
+            <span class="text-red-400 font-medium">-R$ 450 <span class="text-xs text-gray-500">(3x)</span></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400 text-xs">Chargebacks</span>
+            <span class="text-red-400 font-medium">-R$ 890 <span class="text-xs text-gray-500">(2x)</span></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400 text-xs">Debitos Retro</span>
+            <span class="text-red-400 font-medium">-R$ 1.400 <span class="text-xs text-gray-500">(4x)</span></span>
+          </div>
+          <div class="flex items-center gap-2 ml-auto">
+            <span class="text-gray-400 text-xs">Comissao Liquida</span>
+            <span class="text-[#F1E52F] font-bold text-lg">R$ 12.450</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Origin table -->
+      <div class="bg-white rounded-b-xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-[#1C1C1C] text-white text-xs uppercase">
+                <th class="px-4 py-3 text-left font-semibold tracking-wide">Origem</th>
+                <th class="px-4 py-3 text-center font-semibold tracking-wide">Qtd Pedidos</th>
+                <th class="px-4 py-3 text-right font-semibold tracking-wide">Valor Total</th>
+                <th class="px-4 py-3 text-center font-semibold tracking-wide">% Comissao</th>
+                <th class="px-4 py-3 text-right font-semibold tracking-wide">Comissao R$</th>
+                <th class="px-4 py-3 text-center font-semibold tracking-wide">% do Total</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#F2F2F2]">
+
+              <!-- Origin 1: Upsell Cartao Amostra -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">Upsell Cartao Amostra</span>
+                </td>
+                <td class="px-4 py-3 text-center text-[#575756]">18</td>
+                <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 54.000,00</td>
+                <td class="px-4 py-3 text-center text-[#575756]">4%</td>
+                <td class="px-4 py-3 text-right font-bold text-green-600">R$ 2.160,00</td>
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-12 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-purple-500 rounded-full" style="width:29%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">29%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Origin 2: Upsell Cartao Kit -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Upsell Cartao Kit</span>
+                </td>
+                <td class="px-4 py-3 text-center text-[#575756]">15</td>
+                <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 67.500,00</td>
+                <td class="px-4 py-3 text-center text-[#575756]">4%</td>
+                <td class="px-4 py-3 text-right font-bold text-green-600">R$ 2.700,00</td>
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-12 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-blue-500 rounded-full" style="width:36%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">36%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Origin 3: Upsell PIX -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Upsell PIX</span>
+                </td>
+                <td class="px-4 py-3 text-center text-[#575756]">12</td>
+                <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 28.800,00</td>
+                <td class="px-4 py-3 text-center text-[#575756]">4%</td>
+                <td class="px-4 py-3 text-right font-bold text-green-600">R$ 1.152,00</td>
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-12 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" style="width:15%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">15%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Origin 4: Recup. Abandono -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Recup. Abandono</span>
+                </td>
+                <td class="px-4 py-3 text-center text-[#575756]">10</td>
+                <td class="px-4 py-3 text-right font-medium text-[#1C1C1C]">R$ 35.000,00</td>
+                <td class="px-4 py-3 text-center text-[#575756]">4%</td>
+                <td class="px-4 py-3 text-right font-bold text-green-600">R$ 1.400,00</td>
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-12 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-orange-500 rounded-full" style="width:19%"></div>
+                    </div>
+                    <span class="text-xs text-[#575756]">19%</span>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== MODAL 2: Bonus Batidos ===== -->
+  <div id="modal-bonus" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal('modal-bonus')"></div>
+    <!-- Modal content -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl">
+
+      <!-- Red gradient header -->
+      <div class="bg-gradient-to-r from-red-600 to-red-500 px-6 py-4 flex items-center justify-between rounded-t-xl">
+        <div class="flex items-center gap-3">
+          <i data-lucide="trophy" class="w-5 h-5 text-white"></i>
+          <h3 class="text-white font-bold text-lg">Bonus Batidos - Detalhamento Completo</h3>
+        </div>
+        <button onclick="closeModal('modal-bonus')" class="text-red-200 hover:text-white transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Bonus table -->
+      <div class="bg-white rounded-b-xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-[#1C1C1C] text-white text-xs uppercase">
+                <th class="px-4 py-3 text-center font-semibold tracking-wide w-12">#</th>
+                <th class="px-4 py-3 text-left font-semibold tracking-wide">Vendedor</th>
+                <th class="px-4 py-3 text-left font-semibold tracking-wide">Meta Atingida</th>
+                <th class="px-4 py-3 text-right font-semibold tracking-wide">Valor Bonus</th>
+                <th class="px-4 py-3 text-center font-semibold tracking-wide">Data</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#F2F2F2]">
+
+              <!-- Bonus Row 1 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-1">
+                    <i data-lucide="crown" class="w-4 h-4 text-yellow-500"></i>
+                    <span class="font-bold text-yellow-600">1</span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Marcos</td>
+                <td class="px-4 py-3 text-[#575756]">50 vendas</td>
+                <td class="px-4 py-3 text-right">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">R$ 250</span>
+                </td>
+                <td class="px-4 py-3 text-center text-[#575756] text-xs">25/03/2026</td>
+              </tr>
+
+              <!-- Bonus Row 2 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-1">
+                    <i data-lucide="medal" class="w-4 h-4 text-gray-400"></i>
+                    <span class="font-bold text-gray-500">2</span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Ramon</td>
+                <td class="px-4 py-3 text-[#575756]">40 vendas</td>
+                <td class="px-4 py-3 text-right">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">R$ 200</span>
+                </td>
+                <td class="px-4 py-3 text-center text-[#575756] text-xs">22/03/2026</td>
+              </tr>
+
+              <!-- Bonus Row 3 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-1">
+                    <i data-lucide="medal" class="w-4 h-4 text-amber-700"></i>
+                    <span class="font-bold text-amber-700">3</span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Priscila</td>
+                <td class="px-4 py-3 text-[#575756]">30 vendas</td>
+                <td class="px-4 py-3 text-right">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">R$ 150</span>
+                </td>
+                <td class="px-4 py-3 text-center text-[#575756] text-xs">20/03/2026</td>
+              </tr>
+
+              <!-- Bonus Row 4 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <span class="font-bold text-[#575756]">4</span>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Anderson</td>
+                <td class="px-4 py-3 text-[#575756]">20 vendas</td>
+                <td class="px-4 py-3 text-right">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">R$ 100</span>
+                </td>
+                <td class="px-4 py-3 text-center text-[#575756] text-xs">18/03/2026</td>
+              </tr>
+
+              <!-- Bonus Row 5 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <span class="font-bold text-[#575756]">5</span>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Alisson</td>
+                <td class="px-4 py-3 text-[#575756]">20 vendas</td>
+                <td class="px-4 py-3 text-right">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">R$ 100</span>
+                </td>
+                <td class="px-4 py-3 text-center text-[#575756] text-xs">18/03/2026</td>
+              </tr>
+
+              <!-- Bonus Row 6 -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-4 py-3 text-center">
+                  <span class="font-bold text-[#575756]">6</span>
+                </td>
+                <td class="px-4 py-3 font-medium text-[#1C1C1C]">Gustavo</td>
+                <td class="px-4 py-3 text-[#575756]">10 vendas</td>
+                <td class="px-4 py-3 text-right">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">R$ 50</span>
+                </td>
+                <td class="px-4 py-3 text-center text-[#575756] text-xs">15/03/2026</td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 border-t border-[#DADADA] bg-gray-50 rounded-b-xl flex items-center justify-between">
+          <span class="text-sm text-[#575756]">Total de Bonus Distribuidos</span>
+          <div class="flex items-center gap-3">
+            <span class="text-lg font-bold text-[#1C1C1C]">R$ 850,00</span>
+            <span class="text-xs text-[#575756]">- 6 vendedores</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // ========== GLOBAL: Close all dropdowns ==========
+    function closeAllDropdowns(except) {
+      // Close date picker
+      if (except !== 'drp') {
+        document.getElementById('drp-dropdown').classList.add('hidden');
+      }
+      // Close all multi-selects
+      document.querySelectorAll('.ms-container').forEach(c => {
+        if (except && c.id === except) return;
+        const dd = c.querySelector('.ms-dropdown');
+        const trig = c.querySelector('.ms-trigger');
+        if (dd) dd.classList.add('hidden');
+        if (trig) trig.classList.remove('open');
+      });
+    }
+
+    // Click outside closes all dropdowns
+    document.addEventListener('click', function(e) {
+      // Date picker
+      const drpContainer = document.getElementById('drp-container');
+      if (drpContainer && !drpContainer.contains(e.target)) {
+        document.getElementById('drp-dropdown').classList.add('hidden');
+      }
+      // Multi-selects
+      document.querySelectorAll('.ms-container').forEach(c => {
+        if (!c.contains(e.target)) {
+          const dd = c.querySelector('.ms-dropdown');
+          const trig = c.querySelector('.ms-trigger');
+          if (dd) dd.classList.add('hidden');
+          if (trig) trig.classList.remove('open');
+        }
+      });
+    });
+
+    // ========== DATE RANGE PICKER ==========
+    const MONTH_NAMES = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    let drpYear = 2026, drpMonth = 2; // March 2026 (0-indexed)
+    let drpStart = new Date(2026, 2, 1), drpEnd = new Date(2026, 2, 31);
+    let drpClickCount = 0;
+
+    function toggleDatePicker() {
+      const dd = document.getElementById('drp-dropdown');
+      const isHidden = dd.classList.contains('hidden');
+      closeAllDropdowns('drp');
+      if (isHidden) {
+        dd.classList.remove('hidden');
+        renderCalendar();
+      } else {
+        dd.classList.add('hidden');
+      }
+    }
+
+    function drpPrevMonth() {
+      drpMonth--;
+      if (drpMonth < 0) { drpMonth = 11; drpYear--; }
+      renderCalendar();
+    }
+
+    function drpNextMonth() {
+      drpMonth++;
+      if (drpMonth > 11) { drpMonth = 0; drpYear++; }
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      document.getElementById('drp-month-label').textContent = MONTH_NAMES[drpMonth] + ' ' + drpYear;
+      const container = document.getElementById('drp-days');
+      container.innerHTML = '';
+
+      const firstDay = new Date(drpYear, drpMonth, 1).getDay();
+      const daysInMonth = new Date(drpYear, drpMonth + 1, 0).getDate();
+      const today = new Date();
+
+      // Empty cells for days before first
+      for (let i = 0; i < firstDay; i++) {
+        const el = document.createElement('div');
+        el.className = 'drp-day empty';
+        container.appendChild(el);
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const el = document.createElement('div');
+        el.className = 'drp-day';
+        el.textContent = d;
+
+        const thisDate = new Date(drpYear, drpMonth, d);
+
+        // Highlight today
+        if (thisDate.toDateString() === today.toDateString()) el.classList.add('today');
+
+        // Highlight range
+        if (drpStart && drpEnd) {
+          if (thisDate.getTime() === drpStart.getTime()) el.classList.add('range-start');
+          else if (thisDate.getTime() === drpEnd.getTime()) el.classList.add('range-end');
+          else if (thisDate > drpStart && thisDate < drpEnd) el.classList.add('in-range');
+        } else if (drpStart && thisDate.getTime() === drpStart.getTime()) {
+          el.classList.add('range-start');
+        }
+
+        el.addEventListener('click', function() {
+          drpClickCount++;
+          if (drpClickCount === 1) {
+            drpStart = thisDate;
+            drpEnd = null;
+          } else {
+            drpClickCount = 0;
+            if (thisDate < drpStart) {
+              drpEnd = drpStart;
+              drpStart = thisDate;
+            } else {
+              drpEnd = thisDate;
+            }
+          }
+          renderCalendar();
+        });
+
+        container.appendChild(el);
+      }
+
+      lucide.createIcons();
+    }
+
+    function drpClear() {
+      drpStart = null; drpEnd = null; drpClickCount = 0;
+      renderCalendar();
+    }
+
+    function drpApply() {
+      if (drpStart && drpEnd) {
+        const fmt = d => String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+        document.getElementById('drp-label').textContent = fmt(drpStart) + ' \u2014 ' + fmt(drpEnd);
+      }
+      document.getElementById('drp-dropdown').classList.add('hidden');
+    }
+
+    // Init calendar
+    renderCalendar();
+
+    // ========== MULTI-SELECT COMPONENT ==========
+    function createMultiSelect(containerId, options, placeholder) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      let selected = new Set();
+
+      // Build trigger
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'ms-trigger';
+      trigger.tabIndex = 0;
+      trigger.innerHTML = '<div class="ms-pills"><span class="ms-placeholder">' + placeholder + '</span></div><svg class="ms-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
+      // Build dropdown
+      const dropdown = document.createElement('div');
+      dropdown.className = 'ms-dropdown hidden';
+
+      const searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.className = 'ms-search';
+      searchInput.placeholder = 'Buscar...';
+
+      const links = document.createElement('div');
+      links.className = 'ms-links';
+      const selectAllLink = document.createElement('a');
+      selectAllLink.textContent = 'Selecionar todos';
+      const clearLink = document.createElement('a');
+      clearLink.textContent = 'Limpar';
+      links.appendChild(selectAllLink);
+      links.appendChild(clearLink);
+
+      const list = document.createElement('div');
+      list.className = 'ms-list';
+
+      options.forEach(opt => {
+        const row = document.createElement('label');
+        row.className = 'ms-option';
+        row.dataset.searchText = opt.label.toLowerCase();
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = opt.value;
+
+        const label = document.createElement('span');
+        label.textContent = opt.label;
+
+        row.appendChild(cb);
+        row.appendChild(label);
+        list.appendChild(row);
+
+        cb.addEventListener('change', function(e) {
+          e.stopPropagation();
+          if (cb.checked) selected.add(opt.value);
+          else selected.delete(opt.value);
+          updateTrigger();
+        });
+
+        row.addEventListener('click', function(e) {
+          if (e.target !== cb) {
+            e.preventDefault();
+            cb.checked = !cb.checked;
+            if (cb.checked) selected.add(opt.value);
+            else selected.delete(opt.value);
+            updateTrigger();
+          }
+        });
+      });
+
+      dropdown.appendChild(searchInput);
+      dropdown.appendChild(links);
+      dropdown.appendChild(list);
+      container.appendChild(trigger);
+      container.appendChild(dropdown);
+
+      // Search filter
+      searchInput.addEventListener('input', function() {
+        const q = searchInput.value.toLowerCase();
+        list.querySelectorAll('.ms-option').forEach(row => {
+          row.classList.toggle('hidden-opt', !row.dataset.searchText.includes(q));
+        });
+      });
+
+      // Prevent dropdown close when clicking inside
+      dropdown.addEventListener('click', function(e) { e.stopPropagation(); });
+
+      // Select all
+      selectAllLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        list.querySelectorAll('.ms-option:not(.hidden-opt) input[type="checkbox"]').forEach(cb => {
+          cb.checked = true;
+          selected.add(cb.value);
+        });
+        updateTrigger();
+      });
+
+      // Clear
+      clearLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.checked = false;
+        });
+        selected.clear();
+        updateTrigger();
+      });
+
+      // Toggle dropdown
+      trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isHidden = dropdown.classList.contains('hidden');
+        closeAllDropdowns(containerId);
+        if (isHidden) {
+          dropdown.classList.remove('hidden');
+          trigger.classList.add('open');
+          searchInput.value = '';
+          searchInput.dispatchEvent(new Event('input'));
+          setTimeout(() => searchInput.focus(), 50);
+        } else {
+          dropdown.classList.add('hidden');
+          trigger.classList.remove('open');
+        }
+      });
+
+      function updateTrigger() {
+        const pills = trigger.querySelector('.ms-pills');
+        pills.innerHTML = '';
+        if (selected.size === 0) {
+          const ph = document.createElement('span');
+          ph.className = 'ms-placeholder';
+          ph.textContent = placeholder;
+          pills.appendChild(ph);
+        } else if (selected.size === 1) {
+          const val = Array.from(selected)[0];
+          const opt = options.find(o => o.value === val);
+          const pill = document.createElement('span');
+          pill.className = 'ms-pill';
+          pill.textContent = opt ? opt.label : val;
+          pills.appendChild(pill);
+        } else {
+          const pill = document.createElement('span');
+          pill.className = 'ms-pill';
+          pill.textContent = selected.size + ' selecionados';
+          pills.appendChild(pill);
+        }
+      }
+    }
+
+    // Initialize multi-selects
+    createMultiSelect('ms-empresa', [
+      { value: 'all', label: 'Todas as empresas' },
+      { value: 'EMP001', label: 'EMP001 - Empresa Alpha' },
+      { value: 'EMP002', label: 'EMP002 - Empresa Beta' },
+      { value: 'EMP003', label: 'EMP003 - Empresa Gamma' },
+      { value: 'EMP004', label: 'EMP004 - Empresa Delta' }
+    ], 'Todas as empresas');
+
+    createMultiSelect('ms-metodo', [
+      { value: 'all', label: 'Todos os metodos' },
+      { value: 'cartao', label: 'Cartao de Credito' },
+      { value: 'pix', label: 'Pix' },
+      { value: 'boleto', label: 'Boleto' }
+    ], 'Todos os metodos');
+
+    // ========== SIDEBAR TOGGLE ==========
+    let sidebarExpanded = true;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const logoExpanded = document.getElementById('logo-expanded');
+      const logoCompact = document.getElementById('logo-compact');
+      const toggleLabel = document.getElementById('toggle-label');
+      const toggleIcon = document.getElementById('toggle-icon');
+      const navLabels = document.querySelectorAll('.nav-label');
+
+      sidebarExpanded = !sidebarExpanded;
+
+      if (sidebarExpanded) {
+        sidebar.style.width = '260px';
+        logoExpanded.classList.remove('hidden');
+        logoCompact.classList.add('hidden');
+        toggleLabel.textContent = 'Recolher';
+        navLabels.forEach(l => { l.style.width = 'auto'; l.style.opacity = '1'; });
+        toggleIcon.setAttribute('data-lucide', 'panel-left-close');
+      } else {
+        sidebar.style.width = '72px';
+        logoExpanded.classList.add('hidden');
+        logoCompact.classList.remove('hidden');
+        toggleLabel.textContent = '';
+        navLabels.forEach(l => { l.style.width = '0'; l.style.opacity = '0'; });
+        toggleIcon.setAttribute('data-lucide', 'panel-left-open');
+      }
+
+      lucide.createIcons();
+    }
+
+    // ========== TAB SWITCHING ==========
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.add('hidden');
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-[#F1E52F]', 'text-[#1C1C1C]', 'font-semibold');
+        btn.classList.add('border-transparent');
+        if (btn.id !== 'btn-tab-retroativos') {
+          btn.classList.add('text-[#575756]', 'font-medium');
+        }
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('btn-' + tabId);
+      activeBtn.classList.add('border-[#F1E52F]', 'font-semibold');
+      activeBtn.classList.remove('border-transparent', 'font-medium');
+      if (activeBtn.id === 'btn-tab-retroativos') {
+        activeBtn.classList.add('text-red-700');
+      } else {
+        activeBtn.classList.add('text-[#1C1C1C]');
+        activeBtn.classList.remove('text-[#575756]');
+      }
+    }
+
+    // ========== MODALS ==========
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        // Close modals
+        document.querySelectorAll('.fixed.z-50:not(.hidden)').forEach(modal => {
+          modal.classList.add('hidden');
+        });
+        document.body.style.overflow = '';
+        // Close all dropdowns
+        closeAllDropdowns();
+      }
+    });
+
+    // Re-render Lucide icons for dynamically added elements
+    lucide.createIcons();
+  </script>
+
+</body>
+</html>
