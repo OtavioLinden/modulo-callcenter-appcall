@@ -1,0 +1,125 @@
+/* ==========================================================================
+   Shared CSS — Modulo AppCall (PagCall)
+   Estilos reutilizaveis extraidos das paginas do modulo.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. DATE RANGE PICKER (.drp-*)
+   ========================================================================== */
+
+.drp-trigger { position: relative; }
+.drp-dropdown {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 30;
+  background: #fff; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.15);
+  width: 320px; padding: 16px; user-select: none;
+}
+.drp-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.drp-nav button { background: none; border: none; cursor: pointer; padding: 4px; border-radius: 6px; color: #575756; }
+.drp-nav button:hover { background: #F2F2F2; }
+.drp-nav span { font-weight: 600; font-size: 14px; color: #1C1C1C; }
+.drp-weekdays { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; font-size: 11px; color: #575756; font-weight: 600; margin-bottom: 4px; }
+.drp-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.drp-day {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 8px; font-size: 13px;
+  cursor: pointer; color: #1C1C1C; transition: background .15s;
+}
+.drp-day:hover { background: #F2F2F2; }
+.drp-day.empty { cursor: default; }
+.drp-day.empty:hover { background: transparent; }
+.drp-day.today { font-weight: 700; }
+.drp-day.range-start, .drp-day.range-end { background: #F1E52F !important; font-weight: 700; color: #1C1C1C; }
+.drp-day.in-range { background: #F1E52F33; }
+.drp-day.other-month { color: #DADADA; }
+.drp-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #F2F2F2; }
+.drp-actions button { padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+.drp-actions .btn-clear { background: #F2F2F2; color: #575756; }
+.drp-actions .btn-clear:hover { background: #DADADA; }
+.drp-actions .btn-apply { background: #F1E52F; color: #1C1C1C; }
+.drp-actions .btn-apply:hover { filter: brightness(.95); }
+
+
+/* ==========================================================================
+   2. MULTI-SELECT (.ms-*)
+   ========================================================================== */
+
+.ms-container { position: relative; }
+.ms-trigger {
+  display: flex; align-items: center; gap: 6px; border: 1px solid #DADADA; border-radius: 8px;
+  padding: 7px 12px; background: #fff; cursor: pointer; font-size: 14px; color: #1C1C1C;
+  min-width: 180px; transition: border-color .15s, box-shadow .15s;
+}
+.ms-trigger:focus, .ms-trigger.open {
+  border-color: #F1E52F; box-shadow: 0 0 0 3px rgba(241,229,47,.2); outline: none;
+}
+.ms-trigger .ms-pills { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; align-items: center; }
+.ms-trigger .ms-pill {
+  background: #F2F2F2; color: #1C1C1C; font-size: 12px; border-radius: 9999px;
+  padding: 1px 8px; white-space: nowrap; font-weight: 500;
+}
+.ms-trigger .ms-placeholder { color: #575756; font-size: 14px; }
+.ms-trigger .ms-chevron { margin-left: auto; flex-shrink: 0; transition: transform .2s; color: #575756; }
+.ms-trigger.open .ms-chevron { transform: rotate(180deg); }
+.ms-dropdown {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30;
+  background: #fff; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,.15);
+  padding: 8px; min-width: 240px;
+}
+.ms-dropdown .ms-search {
+  width: 100%; border: 1px solid #DADADA; border-radius: 8px; padding: 7px 10px;
+  font-size: 13px; margin-bottom: 6px; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.ms-dropdown .ms-search:focus { border-color: #F1E52F; box-shadow: 0 0 0 3px rgba(241,229,47,.2); }
+.ms-dropdown .ms-links { display: flex; justify-content: space-between; padding: 4px 4px 8px; font-size: 12px; }
+.ms-dropdown .ms-links a { color: #575756; cursor: pointer; font-weight: 600; text-decoration: none; }
+.ms-dropdown .ms-links a:hover { color: #1C1C1C; }
+.ms-dropdown .ms-list { max-height: 192px; overflow-y: auto; }
+.ms-dropdown .ms-option {
+  display: flex; align-items: center; gap: 8px; padding: 7px 8px;
+  border-radius: 6px; cursor: pointer; font-size: 13px; color: #1C1C1C;
+}
+.ms-dropdown .ms-option:hover { background: #F2F2F2; }
+.ms-dropdown .ms-option input[type="checkbox"] { accent-color: #F1E52F; width: 16px; height: 16px; cursor: pointer; }
+.ms-dropdown .ms-option.hidden-opt { display: none; }
+
+
+/* ==========================================================================
+   3. TOGGLE SWITCH (.toggle-*)
+   ========================================================================== */
+
+.toggle-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track {
+  width: 36px; height: 20px;
+  background: #DADADA;
+  border-radius: 9999px;
+  transition: background 0.2s;
+  position: relative;
+}
+.toggle-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  background: #fff;
+  border-radius: 9999px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch input:checked ~ .toggle-track { background: #22C55E; }
+.toggle-switch input:checked ~ .toggle-track .toggle-thumb { transform: translateX(16px); }
+
+
+/* ==========================================================================
+   4. SCROLLBAR STYLES
+   ========================================================================== */
+
+/* Global slim scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #DADADA; border-radius: 3px; }
+
+/* Extra-slim scrollbar for multi-select lists */
+.ms-list::-webkit-scrollbar { width: 4px; }
+.ms-list::-webkit-scrollbar-thumb { background: #DADADA; border-radius: 4px; }

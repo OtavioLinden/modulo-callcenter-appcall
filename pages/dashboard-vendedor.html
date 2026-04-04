@@ -12,6 +12,7 @@
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <link rel="icon" href="../assets/pagcall/logo/svg/Icone.svg" type="image/svg+xml">
   <style>
     body { font-family: 'Ubuntu', sans-serif; }
 
@@ -90,6 +91,21 @@
 
     /* Label styling for filter labels */
     .filter-label { font-size: 11px; font-weight: 600; color: #575756; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+
+    /* Sidebar */
+    #sidebar { transition: width 0.25s ease; }
+    #sidebar.compact { width: 72px; }
+    #sidebar.compact .nav-label { display: none; }
+
+    /* Sidebar hover expand when compact */
+    #sidebar.compact:hover {
+        width: 260px;
+        box-shadow: 4px 0 12px rgba(0,0,0,0.08);
+    }
+    #sidebar.compact:hover .sidebar-toggle-label,
+    #sidebar.compact:hover .nav-label {
+        display: inline;
+    }
   </style>
 </head>
 <body class="bg-[#F2F2F2] h-screen overflow-hidden">
@@ -123,7 +139,7 @@
     <nav class="flex-1 py-4 flex flex-col gap-1 px-2 overflow-hidden">
 
       <!-- Dashboard (ACTIVE) -->
-      <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#F2F2F2] text-[#1C1C1C] font-semibold border-r-[3px] border-[#F1E52F] transition-colors group">
+      <a href="#" title="Dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#F2F2F2] text-[#1C1C1C] font-semibold border-r-[3px] border-[#F1E52F] transition-colors group">
         <span class="flex-shrink-0 w-5 h-5 flex items-center justify-center">
           <span class="material-symbols-rounded" style="font-size:20px">space_dashboard</span>
         </span>
@@ -131,7 +147,7 @@
       </a>
 
       <!-- Leads / Atendimento (inactive) -->
-      <a href="leads-atendimento.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
+      <a href="leads-atendimento.html" title="Leads / Atendimento" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
         <span class="flex-shrink-0 w-5 h-5 flex items-center justify-center">
           <span class="material-symbols-rounded" style="font-size:20px">assignment</span>
         </span>
@@ -1721,12 +1737,14 @@
       sidebarExpanded = !sidebarExpanded;
 
       if (sidebarExpanded) {
+        sidebar.classList.remove('compact');
         sidebar.style.width = '260px';
         mainContent.style.marginLeft = '260px';
         toggleLabel.textContent = 'Recolher';
         navLabels.forEach(l => { l.style.width = 'auto'; l.style.opacity = '1'; });
         toggleIcon.textContent = 'menu_open';
       } else {
+        sidebar.classList.add('compact');
         sidebar.style.width = '72px';
         mainContent.style.marginLeft = '72px';
         toggleLabel.textContent = '';

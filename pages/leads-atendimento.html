@@ -12,6 +12,7 @@
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <link rel="icon" href="../assets/pagcall/logo/svg/Icone.svg" type="image/svg+xml">
   <style>
     body { font-family: 'Ubuntu', sans-serif; }
 
@@ -85,6 +86,18 @@
     /* Sidebar */
     #sidebar { transition: width 0.3s ease; }
     #sidebar .nav-label { transition: max-width 0.3s, opacity 0.3s; overflow: hidden; white-space: nowrap; }
+    #sidebar.compact { width: 72px; }
+    #sidebar.compact .nav-label { display: none; }
+
+    /* Sidebar hover expand when compact */
+    #sidebar.compact:hover {
+        width: 260px;
+        box-shadow: 4px 0 12px rgba(0,0,0,0.08);
+    }
+    #sidebar.compact:hover .sidebar-toggle-label,
+    #sidebar.compact:hover .nav-label {
+        display: inline;
+    }
   </style>
 </head>
 <body class="bg-[#F2F2F2] min-h-screen">
@@ -120,7 +133,7 @@
     <nav class="flex-1 py-4 flex flex-col gap-1 px-2 overflow-hidden">
 
       <!-- Dashboard (inactive) -->
-      <a href="dashboard-gerente.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
+      <a href="dashboard-gerente.html" title="Dashboard Geral" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
         <span class="flex-shrink-0 flex items-center justify-center">
           <span class="material-symbols-rounded" style="font-size:20px">space_dashboard</span>
         </span>
@@ -128,7 +141,7 @@
       </a>
 
       <!-- Leads / Atendimento (active) -->
-      <a href="leads-atendimento.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#F2F2F2] text-[#1C1C1C] font-semibold border-r-[3px] border-[#F1E52F] transition-colors group">
+      <a href="leads-atendimento.html" title="Leads / Atendimento" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#F2F2F2] text-[#1C1C1C] font-semibold border-r-[3px] border-[#F1E52F] transition-colors group">
         <span class="flex-shrink-0 flex items-center justify-center">
           <span class="material-symbols-rounded" style="font-size:20px">assignment</span>
         </span>
@@ -136,7 +149,7 @@
       </a>
 
       <!-- Gestao de Usuarios -->
-      <a href="gestao-usuarios.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
+      <a href="gestao-usuarios.html" title="Gestao de Usuarios" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
         <span class="flex-shrink-0 flex items-center justify-center">
           <span class="material-symbols-rounded" style="font-size:20px">group</span>
         </span>
@@ -144,7 +157,7 @@
       </a>
 
       <!-- Gestao de Empresas -->
-      <a href="gestao-empresas.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
+      <a href="gestao-empresas.html" title="Gestao de Empresas" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
         <span class="flex-shrink-0 flex items-center justify-center">
           <span class="material-symbols-rounded" style="font-size:20px">domain</span>
         </span>
@@ -582,6 +595,7 @@
       sidebarExpanded = !sidebarExpanded;
 
       if (sidebarExpanded) {
+        sidebar.classList.remove('compact');
         sidebar.style.width = '260px';
         toggleLabel.textContent = 'Recolher';
         navLabels.forEach(el => {
@@ -590,12 +604,13 @@
         });
         toggleIcon.textContent = 'menu_open';
       } else {
+        sidebar.classList.add('compact');
         sidebar.style.width = '72px';
         navLabels.forEach(el => {
           el.style.maxWidth = '0';
           el.style.opacity = '0';
         });
-        toggleIcon.textContent = 'menu_open';
+        toggleIcon.textContent = 'menu';
       }
     }
 

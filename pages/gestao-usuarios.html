@@ -7,16 +7,28 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <link rel="icon" href="../assets/pagcall/logo/svg/Icone.svg" type="image/svg+xml">
   <style>
     body { font-family: 'Ubuntu', sans-serif; }
 
     /* Sidebar transition */
     #sidebar { transition: width 0.25s ease; }
-    #sidebar.compact { width: 64px; }
-    #sidebar.expanded { width: 220px; }
+    #sidebar.compact { width: 72px; }
+    #sidebar.expanded { width: 260px; }
 
     /* Nav item labels hide when compact */
     #sidebar.compact .nav-label { display: none; }
+
+    /* Sidebar hover expand when compact */
+    #sidebar.compact:hover {
+        width: 260px;
+        box-shadow: 4px 0 12px rgba(0,0,0,0.08);
+    }
+    #sidebar.compact:hover .sidebar-toggle-label,
+    #sidebar.compact:hover .nav-label {
+        display: inline;
+    }
+
     #sidebar.compact .logo-expanded { display: none; }
     #sidebar.compact .logo-compact { display: block; }
     #sidebar.expanded .logo-expanded { display: block; }
@@ -107,21 +119,21 @@
       <nav class="flex flex-col gap-1 mt-3 flex-1 px-2">
 
         <!-- Dashboard Geral -->
-        <a href="dashboard-gerente.html"
+        <a href="dashboard-gerente.html" title="Dashboard Geral"
            class="nav-item flex items-center gap-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] hover:text-[#1C1C1C] transition-colors text-sm">
           <span class="material-symbols-rounded flex-shrink-0" style="font-size:20px">space_dashboard</span>
           <span class="nav-label">Dashboard Geral</span>
         </a>
 
         <!-- Leads / Atendimento -->
-        <a href="leads-atendimento.html"
+        <a href="leads-atendimento.html" title="Leads / Atendimento"
            class="nav-item flex items-center gap-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] hover:text-[#1C1C1C] transition-colors text-sm">
           <span class="material-symbols-rounded flex-shrink-0" style="font-size:20px">assignment</span>
           <span class="nav-label">Leads / Atendimento</span>
         </a>
 
         <!-- Gestao de Usuarios — ACTIVE -->
-        <a href="gestao-usuarios.html"
+        <a href="gestao-usuarios.html" title="Gestao de Usuarios"
            class="nav-item flex items-center gap-3 py-2.5 rounded-lg bg-[#F2F2F2] text-[#1C1C1C] font-semibold border-r-[3px] border-[#F1E52F] transition-colors text-sm"
            style="border-right: 3px solid #F1E52F;">
           <span class="material-symbols-rounded flex-shrink-0" style="font-size:20px">group</span>
@@ -129,7 +141,7 @@
         </a>
 
         <!-- Gestao de Empresas -->
-        <a href="gestao-empresas.html"
+        <a href="gestao-empresas.html" title="Gestao de Empresas"
            class="nav-item flex items-center gap-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] hover:text-[#1C1C1C] transition-colors text-sm">
           <span class="material-symbols-rounded flex-shrink-0" style="font-size:20px">domain</span>
           <span class="nav-label">Gestao de Empresas</span>
@@ -152,7 +164,7 @@
     <!-- ============================================================
          MAIN CONTENT
     ============================================================ -->
-    <main id="main-content" class="flex-1 flex flex-col transition-all duration-[250ms]" style="margin-left: 220px;">
+    <main id="main-content" class="flex-1 flex flex-col transition-all duration-[250ms]" style="margin-left: 260px;">
 
       <!-- Page header bar -->
       <div class="bg-white border-b border-[#DADADA] px-8 py-4 flex items-center justify-between flex-shrink-0">
@@ -999,13 +1011,13 @@
       if (sidebarExpanded) {
         sidebar.classList.remove('compact');
         sidebar.classList.add('expanded');
-        main.style.marginLeft = '220px';
+        main.style.marginLeft = '260px';
         icon.textContent = 'menu_open';
       } else {
         sidebar.classList.remove('expanded');
         sidebar.classList.add('compact');
-        main.style.marginLeft = '64px';
-        icon.textContent = 'menu_open';
+        main.style.marginLeft = '72px';
+        icon.textContent = 'menu';
       }
     }
 

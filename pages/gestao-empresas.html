@@ -7,12 +7,22 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <link rel="icon" href="../assets/pagcall/logo/svg/Icone.svg" type="image/svg+xml">
   <style>
     body { font-family: 'Ubuntu', sans-serif; }
     #sidebar { transition: width 0.25s ease; }
-    #sidebar.compact { width: 64px; }
-    #sidebar.compact .sidebar-label { display: none; }
-    #sidebar.compact .sidebar-toggle-label { display: none; }
+    #sidebar.compact { width: 72px; }
+    #sidebar.compact .nav-label { display: none; }
+
+    /* Sidebar hover expand when compact */
+    #sidebar.compact:hover {
+        width: 260px;
+        box-shadow: 4px 0 12px rgba(0,0,0,0.08);
+    }
+    #sidebar.compact:hover .sidebar-toggle-label,
+    #sidebar.compact:hover .nav-label {
+        display: inline;
+    }
   </style>
 </head>
 <body class="bg-[#F2F2F2] min-h-screen">
@@ -42,54 +52,54 @@
   <div class="flex min-h-screen" style="padding-top: 56px;">
 
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="bg-white shadow-sm flex flex-col fixed left-0 z-40 w-56" style="width: 224px; top: 56px; height: calc(100vh - 56px);">
+    <aside id="sidebar" class="bg-white shadow-sm flex flex-col fixed left-0 z-40 w-56" style="width: 260px; top: 56px; height: calc(100vh - 56px);">
 
       <!-- Nav items -->
       <nav class="flex-1 py-4 flex flex-col gap-1 px-2">
 
         <!-- Dashboard Geral -->
-        <a href="dashboard-gerente.html"
+        <a href="dashboard-gerente.html" title="Dashboard Geral"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
           <span class="material-symbols-rounded shrink-0 text-[#575756] group-hover:text-[#1C1C1C]" style="font-size:20px">space_dashboard</span>
-          <span class="sidebar-label text-sm font-medium truncate">Dashboard Geral</span>
+          <span class="nav-label text-sm font-medium truncate">Dashboard Geral</span>
         </a>
 
         <!-- Leads / Atendimento -->
-        <a href="leads-atendimento.html"
+        <a href="leads-atendimento.html" title="Leads / Atendimento"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
           <span class="material-symbols-rounded shrink-0 text-[#575756] group-hover:text-[#1C1C1C]" style="font-size:20px">assignment</span>
-          <span class="sidebar-label text-sm font-medium truncate">Leads / Atendimento</span>
+          <span class="nav-label text-sm font-medium truncate">Leads / Atendimento</span>
         </a>
 
         <!-- Gestao de Usuarios -->
-        <a href="gestao-usuarios.html"
+        <a href="gestao-usuarios.html" title="Gestao de Usuarios"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
           <span class="material-symbols-rounded shrink-0 text-[#575756] group-hover:text-[#1C1C1C]" style="font-size:20px">group</span>
-          <span class="sidebar-label text-sm font-medium truncate">Gestao de Usuarios</span>
+          <span class="nav-label text-sm font-medium truncate">Gestao de Usuarios</span>
         </a>
 
         <!-- Gestao de Empresas — ACTIVE -->
-        <a href="gestao-empresas.html"
+        <a href="gestao-empresas.html" title="Gestao de Empresas"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#F2F2F2] text-[#1C1C1C] font-semibold border-r-[3px] border-[#F1E52F] transition-colors">
           <span class="material-symbols-rounded shrink-0 text-[#1C1C1C]" style="font-size:20px">domain</span>
-          <span class="sidebar-label text-sm truncate">Gestao de Empresas</span>
+          <span class="nav-label text-sm truncate">Gestao de Empresas</span>
         </a>
 
       </nav>
 
       <!-- Toggle button -->
       <div class="border-t border-[#DADADA] px-2 py-3">
-        <button id="sidebar-toggle"
+        <button id="sidebar-toggle" onclick="toggleSidebar()"
                 class="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors">
           <span id="toggle-icon" class="material-symbols-rounded shrink-0" style="font-size:20px">menu_open</span>
-          <span class="sidebar-label sidebar-toggle-label text-sm font-medium">Recolher menu</span>
+          <span class="nav-label text-sm font-medium">Recolher menu</span>
         </button>
       </div>
 
     </aside>
 
     <!-- MAIN CONTENT -->
-    <main id="main-content" class="flex-1 flex flex-col min-h-screen" style="margin-left: 224px; transition: margin-left 0.25s ease;">
+    <main id="main-content" class="flex-1 flex flex-col min-h-screen" style="margin-left: 260px; transition: margin-left 0.25s ease;">
 
       <!-- Page header -->
       <div class="bg-white border-b border-[#DADADA] px-6 py-4 flex items-center justify-between">
@@ -391,12 +401,12 @@
     function toggleSidebar() {
       const isCompact = sidebar.classList.toggle('compact');
       if (isCompact) {
-        sidebar.style.width = '64px';
-        mainContent.style.marginLeft = '64px';
+        sidebar.style.width = '72px';
+        mainContent.style.marginLeft = '72px';
         toggleIcon.textContent = 'menu_open';
       } else {
-        sidebar.style.width = '224px';
-        mainContent.style.marginLeft = '224px';
+        sidebar.style.width = '260px';
+        mainContent.style.marginLeft = '260px';
         toggleIcon.textContent = 'menu_open';
       }
     }
