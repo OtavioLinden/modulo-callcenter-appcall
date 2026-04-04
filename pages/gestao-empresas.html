@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestao de Empresas | AppCall - Pagah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <style>
+    body { font-family: 'Ubuntu', sans-serif; }
+    #sidebar { transition: width 0.25s ease; }
+    #sidebar.compact { width: 64px; }
+    #sidebar.compact .sidebar-label { display: none; }
+    #sidebar.compact .sidebar-toggle-label { display: none; }
+  </style>
+</head>
+<body class="bg-[#F2F2F2] min-h-screen">
+
+  <!-- HEADER -->
+  <header class="fixed top-0 left-0 right-0 h-14 bg-[#F1E52F] z-50 flex items-center justify-between px-4" style="height:56px;">
+    <div class="flex items-center gap-2">
+        <a href="../index.html">
+            <img src="../assets/pagcall/logo/svg/Icone.svg" alt="PagCall" class="h-8 w-8 rounded-lg">
+        </a>
+        <button onclick="toggleSidebar()" class="w-10 h-10 rounded-full flex flex-col items-center justify-center gap-[5px] hover:bg-black/[0.08] transition-colors" title="Toggle menu">
+            <span class="block w-[18px] h-[2px] bg-[#1C1C1C] rounded-full"></span>
+            <span class="block w-[18px] h-[2px] bg-[#1C1C1C] rounded-full"></span>
+            <span class="block w-[18px] h-[2px] bg-[#1C1C1C] rounded-full"></span>
+        </button>
+    </div>
+    <div class="flex items-center gap-1">
+        <button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/[0.08] relative" title="Notificacoes">
+            <span class="material-symbols-rounded text-[#1C1C1C]" style="font-size:24px">notifications_active</span>
+        </button>
+        <button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/[0.08]" title="Perfil">
+            <span class="material-symbols-rounded text-[#1C1C1C]" style="font-size:24px">person</span>
+        </button>
+    </div>
+  </header>
+
+  <div class="flex min-h-screen" style="padding-top: 56px;">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="bg-white shadow-sm flex flex-col fixed left-0 z-40 w-56" style="width: 224px; top: 56px; height: calc(100vh - 56px);">
+
+      <!-- Nav items -->
+      <nav class="flex-1 py-4 flex flex-col gap-1 px-2">
+
+        <!-- Dashboard Geral -->
+        <a href="dashboard-gerente.html"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
+          <span class="material-symbols-rounded shrink-0 text-[#575756] group-hover:text-[#1C1C1C]" style="font-size:20px">space_dashboard</span>
+          <span class="sidebar-label text-sm font-medium truncate">Dashboard Geral</span>
+        </a>
+
+        <!-- Leads / Atendimento -->
+        <a href="leads-atendimento.html"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
+          <span class="material-symbols-rounded shrink-0 text-[#575756] group-hover:text-[#1C1C1C]" style="font-size:20px">assignment</span>
+          <span class="sidebar-label text-sm font-medium truncate">Leads / Atendimento</span>
+        </a>
+
+        <!-- Gestao de Usuarios -->
+        <a href="gestao-usuarios.html"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors group">
+          <span class="material-symbols-rounded shrink-0 text-[#575756] group-hover:text-[#1C1C1C]" style="font-size:20px">group</span>
+          <span class="sidebar-label text-sm font-medium truncate">Gestao de Usuarios</span>
+        </a>
+
+        <!-- Gestao de Empresas — ACTIVE -->
+        <a href="gestao-empresas.html"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#F2F2F2] text-[#1C1C1C] font-semibold border-r-[3px] border-[#F1E52F] transition-colors">
+          <span class="material-symbols-rounded shrink-0 text-[#1C1C1C]" style="font-size:20px">domain</span>
+          <span class="sidebar-label text-sm truncate">Gestao de Empresas</span>
+        </a>
+
+      </nav>
+
+      <!-- Toggle button -->
+      <div class="border-t border-[#DADADA] px-2 py-3">
+        <button id="sidebar-toggle"
+                class="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-[#575756] hover:bg-[#F2F2F2] transition-colors">
+          <span id="toggle-icon" class="material-symbols-rounded shrink-0" style="font-size:20px">menu_open</span>
+          <span class="sidebar-label sidebar-toggle-label text-sm font-medium">Recolher menu</span>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content" class="flex-1 flex flex-col min-h-screen" style="margin-left: 224px; transition: margin-left 0.25s ease;">
+
+      <!-- Page header -->
+      <div class="bg-white border-b border-[#DADADA] px-6 py-4 flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-bold text-[#1C1C1C]">Gestao de Empresas</h1>
+          <p class="text-xs text-[#575756] mt-0.5">Controle global de disponibilidade para o callcenter</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 bg-[#F2F2F2] rounded-lg px-3 py-2">
+            <span class="material-symbols-rounded text-[#575756]" style="font-size:16px">verified_user</span>
+            <span class="text-sm font-medium text-[#1C1C1C]">Pedro Admin</span>
+            <span class="text-xs bg-[#1C1C1C] text-white rounded-full px-2 py-0.5 font-semibold">Admin</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-1 p-6 flex flex-col gap-5">
+
+        <!-- Yellow info banner -->
+        <div class="bg-[#FFFBEB] border border-[#F1E52F] rounded-xl px-5 py-4 flex items-start gap-3">
+          <span class="material-symbols-rounded text-[#92400E] shrink-0 mt-0.5" style="font-size:20px">info</span>
+          <p class="text-sm text-[#92400E] leading-relaxed">
+            <strong>Configuracao global.</strong> Empresas desativadas nao serao visiveis para nenhum vendedor, independentemente das permissoes individuais. Use os toggles para ativar ou desativar empresas e lojas. Alteracoes tem efeito imediato em todo o sistema.
+          </p>
+        </div>
+
+        <!-- Search + count -->
+        <div class="flex items-center justify-between gap-4">
+          <div class="relative flex-1 max-w-sm">
+            <span class="material-symbols-rounded text-[#575756] absolute left-3 top-1/2 -translate-y-1/2" style="font-size:16px">search</span>
+            <input type="text" placeholder="Buscar empresa..."
+                   class="w-full pl-9 pr-4 py-2.5 bg-white border border-[#DADADA] rounded-lg text-sm text-[#1C1C1C] placeholder-[#DADADA] focus:outline-none focus:border-[#F1E52F] transition-colors">
+          </div>
+          <span class="text-sm text-[#575756] whitespace-nowrap">
+            <span class="font-semibold text-[#1C1C1C]">98</span> empresas cadastradas
+          </span>
+        </div>
+
+        <!-- Table card -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-[#1C1C1C] text-white text-xs uppercase tracking-wide">
+                <th class="px-5 py-3.5 text-left font-semibold w-24">ID</th>
+                <th class="px-5 py-3.5 text-left font-semibold">Empresa</th>
+                <th class="px-5 py-3.5 text-center font-semibold w-24">Lojas</th>
+                <th class="px-5 py-3.5 text-center font-semibold w-28">Status</th>
+                <th class="px-5 py-3.5 text-center font-semibold w-32">Acoes</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#F2F2F2]">
+
+              <!-- Row 1 — NutriVida Suplementos — ON -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-5 py-3.5">
+                  <span class="text-xs font-mono text-[#575756] bg-[#F2F2F2] rounded px-2 py-0.5">EMP001</span>
+                </td>
+                <td class="px-5 py-3.5">
+                  <span class="font-medium text-[#1C1C1C]">NutriVida Suplementos</span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <span class="inline-flex items-center gap-1 text-xs text-[#575756]">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    4
+                  </span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                  </label>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <button onclick="openLojasModal('NutriVida Suplementos', ['Loja SP Centro', 'Loja SP Zona Sul', 'Loja RJ Centro', 'Loja MG BH'])"
+                          class="inline-flex items-center gap-1.5 border border-[#DADADA] text-[#575756] rounded-lg px-4 py-2 text-xs font-medium hover:border-[#F1E52F] hover:text-[#1C1C1C] transition-colors">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    Lojas
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 2 — BelezaPura Cosmeticos — ON -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-5 py-3.5">
+                  <span class="text-xs font-mono text-[#575756] bg-[#F2F2F2] rounded px-2 py-0.5">EMP002</span>
+                </td>
+                <td class="px-5 py-3.5">
+                  <span class="font-medium text-[#1C1C1C]">BelezaPura Cosmeticos</span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <span class="inline-flex items-center gap-1 text-xs text-[#575756]">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    3
+                  </span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                  </label>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <button onclick="openLojasModal('BelezaPura Cosmeticos', ['Loja Online', 'Loja Fisica SP', 'Loja Fisica RJ'])"
+                          class="inline-flex items-center gap-1.5 border border-[#DADADA] text-[#575756] rounded-lg px-4 py-2 text-xs font-medium hover:border-[#F1E52F] hover:text-[#1C1C1C] transition-colors">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    Lojas
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 3 — FitMax Esportes — OFF (disabled row) -->
+              <tr class="bg-red-50/50">
+                <td class="px-5 py-3.5">
+                  <span class="text-xs font-mono text-[#575756] bg-[#F2F2F2] rounded px-2 py-0.5 opacity-60">EMP003</span>
+                </td>
+                <td class="px-5 py-3.5">
+                  <span class="font-medium text-[#1C1C1C] line-through opacity-60">FitMax Esportes</span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <span class="inline-flex items-center gap-1 text-xs text-[#575756] opacity-60">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    5
+                  </span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                  </label>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <button disabled
+                          class="inline-flex items-center gap-1.5 border border-[#DADADA] text-[#DADADA] rounded-lg px-4 py-2 text-xs font-medium cursor-not-allowed opacity-50">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    Lojas
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 4 — DermaPlus Saude — ON -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-5 py-3.5">
+                  <span class="text-xs font-mono text-[#575756] bg-[#F2F2F2] rounded px-2 py-0.5">EMP004</span>
+                </td>
+                <td class="px-5 py-3.5">
+                  <span class="font-medium text-[#1C1C1C]">DermaPlus Saude</span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <span class="inline-flex items-center gap-1 text-xs text-[#575756]">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    2
+                  </span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                  </label>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <button onclick="openLojasModal('DermaPlus Saude', ['Loja Principal', 'Loja Outlet'])"
+                          class="inline-flex items-center gap-1.5 border border-[#DADADA] text-[#575756] rounded-lg px-4 py-2 text-xs font-medium hover:border-[#F1E52F] hover:text-[#1C1C1C] transition-colors">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    Lojas
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 5 — VitalFarma — ON -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-5 py-3.5">
+                  <span class="text-xs font-mono text-[#575756] bg-[#F2F2F2] rounded px-2 py-0.5">EMP005</span>
+                </td>
+                <td class="px-5 py-3.5">
+                  <span class="font-medium text-[#1C1C1C]">VitalFarma</span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <span class="inline-flex items-center gap-1 text-xs text-[#575756]">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    6
+                  </span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                  </label>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <button onclick="openLojasModal('VitalFarma', ['Loja SP', 'Loja RJ', 'Loja BH', 'Loja CWB', 'Loja POA', 'Loja SSA'])"
+                          class="inline-flex items-center gap-1.5 border border-[#DADADA] text-[#575756] rounded-lg px-4 py-2 text-xs font-medium hover:border-[#F1E52F] hover:text-[#1C1C1C] transition-colors">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    Lojas
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 6 — CorpoIdeal Fitness — ON -->
+              <tr class="hover:bg-[#FAFAFA] transition-colors">
+                <td class="px-5 py-3.5">
+                  <span class="text-xs font-mono text-[#575756] bg-[#F2F2F2] rounded px-2 py-0.5">EMP006</span>
+                </td>
+                <td class="px-5 py-3.5">
+                  <span class="font-medium text-[#1C1C1C]">CorpoIdeal Fitness</span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <span class="inline-flex items-center gap-1 text-xs text-[#575756]">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    3
+                  </span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                  </label>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  <button onclick="openLojasModal('CorpoIdeal Fitness', ['Loja Online', 'Loja SP', 'Loja RJ'])"
+                          class="inline-flex items-center gap-1.5 border border-[#DADADA] text-[#575756] rounded-lg px-4 py-2 text-xs font-medium hover:border-[#F1E52F] hover:text-[#1C1C1C] transition-colors">
+                    <span class="material-symbols-rounded" style="font-size:14px">storefront</span>
+                    Lojas
+                  </button>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between">
+          <p class="text-sm text-[#575756]">Mostrando <span class="font-semibold text-[#1C1C1C]">1–6</span> de <span class="font-semibold text-[#1C1C1C]">98</span> empresas</p>
+          <div class="flex items-center gap-1">
+            <button class="w-8 h-8 rounded-lg border border-[#DADADA] flex items-center justify-center text-[#575756] hover:bg-[#F2F2F2] transition-colors disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+              <span class="material-symbols-rounded" style="font-size:16px">chevron_left</span>
+            </button>
+            <button class="w-8 h-8 rounded-lg bg-[#F1E52F] text-[#1C1C1C] font-bold text-sm flex items-center justify-center">1</button>
+            <button class="w-8 h-8 rounded-lg border border-[#DADADA] flex items-center justify-center text-sm text-[#575756] hover:bg-[#F2F2F2] transition-colors">2</button>
+            <button class="w-8 h-8 rounded-lg border border-[#DADADA] flex items-center justify-center text-sm text-[#575756] hover:bg-[#F2F2F2] transition-colors">3</button>
+            <span class="w-8 h-8 flex items-center justify-center text-[#575756] text-sm">...</span>
+            <button class="w-8 h-8 rounded-lg border border-[#DADADA] flex items-center justify-center text-sm text-[#575756] hover:bg-[#F2F2F2] transition-colors">10</button>
+            <button class="w-8 h-8 rounded-lg border border-[#DADADA] flex items-center justify-center text-[#575756] hover:bg-[#F2F2F2] transition-colors">
+              <span class="material-symbols-rounded" style="font-size:16px">chevron_right</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL — Lojas -->
+  <div id="modal-lojas" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-[#1C1C1C]/60" onclick="closeLojasModal()"></div>
+
+    <!-- Card -->
+    <div class="relative bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 flex flex-col max-h-[90vh]">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[#DADADA]">
+        <div>
+          <h2 class="font-bold text-[#1C1C1C] text-base">Lojas</h2>
+          <p id="modal-empresa-name" class="text-sm text-[#575756] mt-0.5"></p>
+        </div>
+        <button onclick="closeLojasModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#575756] hover:bg-[#F2F2F2] transition-colors">
+          <span class="material-symbols-rounded" style="font-size:16px">close</span>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div id="modal-lojas-body" class="overflow-y-auto flex-1 px-6 py-4 flex flex-col gap-3">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#DADADA]">
+        <button onclick="closeLojasModal()"
+                class="px-5 py-2.5 rounded-lg border border-[#DADADA] text-sm text-[#575756] font-medium hover:bg-[#F2F2F2] transition-colors">
+          Cancelar
+        </button>
+        <button onclick="closeLojasModal()"
+                class="px-5 py-2.5 rounded-lg bg-[#F1E52F] text-[#1C1C1C] font-bold text-sm hover:brightness-95 transition-all">
+          Salvar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const toggleIcon = document.getElementById('toggle-icon');
+
+    function toggleSidebar() {
+      const isCompact = sidebar.classList.toggle('compact');
+      if (isCompact) {
+        sidebar.style.width = '64px';
+        mainContent.style.marginLeft = '64px';
+        toggleIcon.textContent = 'menu_open';
+      } else {
+        sidebar.style.width = '224px';
+        mainContent.style.marginLeft = '224px';
+        toggleIcon.textContent = 'menu_open';
+      }
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      toggleSidebar();
+    });
+
+    // Modal — Lojas
+    function openLojasModal(empresaNome, lojas) {
+      document.getElementById('modal-empresa-name').textContent = empresaNome;
+
+      const body = document.getElementById('modal-lojas-body');
+      body.innerHTML = '';
+
+      lojas.forEach((loja, idx) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between py-3 border-b border-[#F2F2F2] last:border-0';
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-[#F2F2F2] rounded-lg flex items-center justify-center shrink-0">
+              <span class="material-symbols-rounded text-[#575756]" style="font-size:16px">storefront</span>
+            </div>
+            <span class="text-sm font-medium text-[#1C1C1C]">${loja}</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" checked class="sr-only peer" id="loja-toggle-${idx}">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+          </label>
+        `;
+        body.appendChild(row);
+      });
+
+      document.getElementById('modal-lojas').classList.remove('hidden');
+    }
+
+    function closeLojasModal() {
+      document.getElementById('modal-lojas').classList.add('hidden');
+    }
+  </script>
+
+</body>
+</html>

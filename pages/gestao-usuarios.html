@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestao de Usuarios | AppCall - Pagah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <style>
+    body { font-family: 'Ubuntu', sans-serif; }
+
+    /* Sidebar transition */
+    #sidebar { transition: width 0.25s ease; }
+    #sidebar.compact { width: 64px; }
+    #sidebar.expanded { width: 220px; }
+
+    /* Nav item labels hide when compact */
+    #sidebar.compact .nav-label { display: none; }
+    #sidebar.compact .logo-expanded { display: none; }
+    #sidebar.compact .logo-compact { display: block; }
+    #sidebar.expanded .logo-expanded { display: block; }
+    #sidebar.expanded .logo-compact { display: none; }
+
+    /* Toggle switch */
+    .toggle-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      width: 36px; height: 20px;
+      background: #DADADA;
+      border-radius: 9999px;
+      transition: background 0.2s;
+      position: relative;
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      background: #fff;
+      border-radius: 9999px;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle-switch input:checked ~ .toggle-track { background: #22C55E; }
+    .toggle-switch input:checked ~ .toggle-track .toggle-thumb { transform: translateX(16px); }
+
+    /* Modal overlay */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.hidden { display: none; }
+
+    /* Sidebar compact text alignment */
+    #sidebar.compact .nav-item { justify-content: center; padding-left: 0; padding-right: 0; }
+    #sidebar.expanded .nav-item { justify-content: flex-start; padding-left: 16px; padding-right: 16px; }
+
+    /* Scrollbar subtle */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #DADADA; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-[#F2F2F2] min-h-screen">
+
+  <!-- ============================================================
+       HEADER
+  ============================================================ -->
+  <header class="fixed top-0 left-0 right-0 h-14 bg-[#F1E52F] z-50 flex items-center justify-between px-4" style="height:56px;">
+    <div class="flex items-center gap-2">
+        <a href="../index.html">
+            <img src="../assets/pagcall/logo/svg/Icone.svg" alt="PagCall" class="h-8 w-8 rounded-lg">
+        </a>
+        <button onclick="toggleSidebar()" class="w-10 h-10 rounded-full flex flex-col items-center justify-center gap-[5px] hover:bg-black/[0.08] transition-colors" title="Toggle menu">
+            <span class="block w-[18px] h-[2px] bg-[#1C1C1C] rounded-full"></span>
+            <span class="block w-[18px] h-[2px] bg-[#1C1C1C] rounded-full"></span>
+            <span class="block w-[18px] h-[2px] bg-[#1C1C1C] rounded-full"></span>
+        </button>
+    </div>
+    <div class="flex items-center gap-1">
+        <button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/[0.08] relative" title="Notificacoes">
+            <span class="material-symbols-rounded text-[#1C1C1C]" style="font-size:24px">notifications_active</span>
+        </button>
+        <button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/[0.08]" title="Perfil">
+            <span class="material-symbols-rounded text-[#1C1C1C]" style="font-size:24px">person</span>
+        </button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       LAYOUT WRAPPER
+  ============================================================ -->
+  <div class="flex min-h-screen" style="padding-top: 56px;">
+
+    <!-- ============================================================
+         SIDEBAR
+    ============================================================ -->
+    <aside id="sidebar" class="expanded bg-white flex flex-col fixed left-0 z-40 shadow-sm border-r border-[#DADADA]" style="top: 56px; height: calc(100vh - 56px);">
+
+      <!-- Divider -->
+      <div class="mx-3 border-t border-[#DADADA] flex-shrink-0 mt-3"></div>
+
+      <!-- Navigation -->
+      <nav class="flex flex-col gap-1 mt-3 flex-1 px-2">
+
+        <!-- Dashboard Geral -->
+        <a href="dashboard-gerente.html"
+           class="nav-item flex items-center gap-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] hover:text-[#1C1C1C] transition-colors text-sm">
+          <span class="material-symbols-rounded flex-shrink-0" style="font-size:20px">space_dashboard</span>
+          <span class="nav-label">Dashboard Geral</span>
+        </a>
+
+        <!-- Leads / Atendimento -->
+        <a href="leads-atendimento.html"
+           class="nav-item flex items-center gap-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] hover:text-[#1C1C1C] transition-colors text-sm">
+          <span class="material-symbols-rounded flex-shrink-0" style="font-size:20px">assignment</span>
+          <span class="nav-label">Leads / Atendimento</span>
+        </a>
+
+        <!-- Gestao de Usuarios — ACTIVE -->
+        <a href="gestao-usuarios.html"
+           class="nav-item flex items-center gap-3 py-2.5 rounded-lg bg-[#F2F2F2] text-[#1C1C1C] font-semibold border-r-[3px] border-[#F1E52F] transition-colors text-sm"
+           style="border-right: 3px solid #F1E52F;">
+          <span class="material-symbols-rounded flex-shrink-0" style="font-size:20px">group</span>
+          <span class="nav-label">Gestao de Usuarios</span>
+        </a>
+
+        <!-- Gestao de Empresas -->
+        <a href="gestao-empresas.html"
+           class="nav-item flex items-center gap-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] hover:text-[#1C1C1C] transition-colors text-sm">
+          <span class="material-symbols-rounded flex-shrink-0" style="font-size:20px">domain</span>
+          <span class="nav-label">Gestao de Empresas</span>
+        </a>
+
+      </nav>
+
+      <!-- Toggle button at bottom -->
+      <div class="flex-shrink-0 px-2 pb-4">
+        <div class="border-t border-[#DADADA] mb-3"></div>
+        <button onclick="toggleSidebar()"
+                class="nav-item flex items-center gap-3 py-2.5 rounded-lg text-[#575756] hover:bg-[#F2F2F2] hover:text-[#1C1C1C] transition-colors text-sm w-full">
+          <span id="toggle-icon" class="material-symbols-rounded flex-shrink-0" style="font-size:20px">menu_open</span>
+          <span class="nav-label text-xs">Recolher menu</span>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- ============================================================
+         MAIN CONTENT
+    ============================================================ -->
+    <main id="main-content" class="flex-1 flex flex-col transition-all duration-[250ms]" style="margin-left: 220px;">
+
+      <!-- Page header bar -->
+      <div class="bg-white border-b border-[#DADADA] px-8 py-4 flex items-center justify-between flex-shrink-0">
+        <div>
+          <h1 class="text-xl font-bold text-[#1C1C1C]">Gestao de Usuarios</h1>
+          <p class="text-xs text-[#575756] mt-0.5">Gerencie vendedores, gerentes e permissoes de acesso</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <p class="text-sm font-semibold text-[#1C1C1C]">Pedro Admin</p>
+            <p class="text-xs text-[#575756]">Administrador</p>
+          </div>
+          <div class="w-9 h-9 rounded-full bg-[#1C1C1C] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+            PA
+          </div>
+        </div>
+      </div>
+
+      <!-- Content area -->
+      <div class="flex-1 p-8">
+
+        <!-- Filter row -->
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <select class="border border-[#DADADA] rounded-lg px-3 py-2 text-sm text-[#575756] bg-white focus:outline-none focus:border-[#F1E52F] focus:ring-1 focus:ring-[#F1E52F]">
+            <option value="">Todos os status</option>
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+          </select>
+
+          <div class="relative flex-1 max-w-xs">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#575756]">
+              <span class="material-symbols-rounded" style="font-size:16px">search</span>
+            </span>
+            <input type="text"
+                   placeholder="Buscar usuario..."
+                   class="w-full border border-[#DADADA] rounded-lg pl-9 pr-3 py-2 text-sm text-[#1C1C1C] bg-white focus:outline-none focus:border-[#F1E52F] focus:ring-1 focus:ring-[#F1E52F] placeholder-[#DADADA]">
+          </div>
+
+          <button onclick="openComissaoPadraoModal()"
+                  class="flex items-center gap-2 border border-[#1C1C1C] text-[#1C1C1C] font-semibold text-sm rounded-lg px-4 py-2 hover:bg-[#1C1C1C] hover:text-white transition-all ml-auto">
+            <span class="material-symbols-rounded" style="font-size:16px">percent</span>
+            Comissao Padrao
+          </button>
+
+          <button onclick="openEditModal('Novo Usuario')"
+                  class="flex items-center gap-2 bg-[#F1E52F] text-[#1C1C1C] font-bold text-sm rounded-lg px-4 py-2 hover:brightness-95 transition-all">
+            <span class="material-symbols-rounded" style="font-size:16px">person_add</span>
+            Novo Usuario
+          </button>
+        </div>
+
+        <!-- Stats line -->
+        <p class="text-xs text-[#575756] mb-5">
+          <span class="font-semibold text-[#1C1C1C]">8 usuarios</span>
+          &nbsp;·&nbsp;
+          <span class="font-semibold text-[#1C1C1C]">1 admin</span>
+          &nbsp;·&nbsp;
+          <span class="font-semibold text-[#1C1C1C]">2 gerentes</span>
+          &nbsp;·&nbsp;
+          <span class="font-semibold text-[#1C1C1C]">5 vendedores</span>
+        </p>
+
+        <!-- Users Table -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-[#1C1C1C] text-white text-xs uppercase tracking-wide">
+                  <th class="px-5 py-3 text-left font-semibold">Nome</th>
+                  <th class="px-5 py-3 text-left font-semibold">Email</th>
+                  <th class="px-5 py-3 text-left font-semibold">Perfil</th>
+                  <th class="px-5 py-3 text-left font-semibold">Gerente Vinculado</th>
+                  <th class="px-5 py-3 text-center font-semibold">Ativo</th>
+                  <th class="px-5 py-3 text-center font-semibold">Comissao</th>
+                  <th class="px-5 py-3 text-left font-semibold">Acoes</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#F2F2F2]">
+
+                <!-- Row 1: Pedro Admin -->
+                <tr class="hover:bg-[#F2F2F2] transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-full bg-[#1C1C1C] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">PA</div>
+                      <span class="font-medium text-[#1C1C1C]">Pedro Admin</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756]">pedro@pagah.com</td>
+                  <td class="px-5 py-3.5">
+                    <span class="inline-flex items-center bg-red-100 text-red-700 text-xs font-semibold rounded-full px-2.5 py-0.5">Admin</span>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#DADADA]">—</td>
+                  <td class="px-5 py-3.5 text-center">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </label>
+                  </td>
+                  <td class="px-5 py-3.5 text-center text-[#DADADA]">—</td>
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <button onclick="openEditModal('Pedro Admin')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Editar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 2: Maria Gerente -->
+                <tr class="hover:bg-[#F2F2F2] transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold flex-shrink-0">MG</div>
+                      <span class="font-medium text-[#1C1C1C]">Maria Gerente</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756]">maria@pagah.com</td>
+                  <td class="px-5 py-3.5">
+                    <span class="inline-flex items-center bg-blue-100 text-blue-700 text-xs font-semibold rounded-full px-2.5 py-0.5">Gerente</span>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#DADADA]">—</td>
+                  <td class="px-5 py-3.5 text-center">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </label>
+                  </td>
+                  <td class="px-5 py-3.5 text-center text-[#DADADA]">—</td>
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <button onclick="openEditModal('Maria Gerente')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Editar
+                      </button>
+                      <button onclick="openPermissoesModal('Maria Gerente')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Permissoes
+                      </button>
+                      <button onclick="openEquipeModal('Maria Gerente')"
+                              class="bg-[#1C1C1C] text-white rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-[#333] transition-colors flex items-center gap-1">
+                        <span class="material-symbols-rounded" style="font-size:12px">group</span>
+                        Gerenciar Equipe
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 3: Ricardo Gerente -->
+                <tr class="hover:bg-[#F2F2F2] transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold flex-shrink-0">RG</div>
+                      <span class="font-medium text-[#1C1C1C]">Ricardo Gerente</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756]">ricardo@pagah.com</td>
+                  <td class="px-5 py-3.5">
+                    <span class="inline-flex items-center bg-blue-100 text-blue-700 text-xs font-semibold rounded-full px-2.5 py-0.5">Gerente</span>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#DADADA]">—</td>
+                  <td class="px-5 py-3.5 text-center">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </label>
+                  </td>
+                  <td class="px-5 py-3.5 text-center text-[#DADADA]">—</td>
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <button onclick="openEditModal('Ricardo Gerente')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Editar
+                      </button>
+                      <button onclick="openPermissoesModal('Ricardo Gerente')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Permissoes
+                      </button>
+                      <button onclick="openEquipeModal('Ricardo Gerente')"
+                              class="bg-[#1C1C1C] text-white rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-[#333] transition-colors flex items-center gap-1">
+                        <span class="material-symbols-rounded" style="font-size:12px">group</span>
+                        Gerenciar Equipe
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 4: Joao Silva -->
+                <tr class="hover:bg-[#F2F2F2] transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-green-700 text-xs font-bold flex-shrink-0">JS</div>
+                      <span class="font-medium text-[#1C1C1C]">Joao Silva</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756]">joao@callcenter.com</td>
+                  <td class="px-5 py-3.5">
+                    <span class="inline-flex items-center bg-green-100 text-green-700 text-xs font-semibold rounded-full px-2.5 py-0.5">Vendedor</span>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756] text-xs">Maria Gerente</td>
+                  <td class="px-5 py-3.5 text-center">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </label>
+                  </td>
+                  <td class="px-5 py-3.5 text-center">
+                    <button onclick="openComissaoUserModal('Joao Silva', false)" title="Comissao Padrao"
+                            class="inline-flex items-center gap-1 text-[#575756] hover:text-[#1C1C1C] transition-colors">
+                      <span class="material-symbols-rounded" style="font-size:16px">percent</span>
+                      <span class="text-xs text-[#DADADA]">Padrao</span>
+                    </button>
+                  </td>
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <button onclick="openEditModal('Joao Silva')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Editar
+                      </button>
+                      <button onclick="openPermissoesModal('Joao Silva')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Permissoes
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 5: Ana Santos -->
+                <tr class="hover:bg-[#F2F2F2] transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-green-700 text-xs font-bold flex-shrink-0">AS</div>
+                      <span class="font-medium text-[#1C1C1C]">Ana Santos</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756]">ana@callcenter.com</td>
+                  <td class="px-5 py-3.5">
+                    <span class="inline-flex items-center bg-green-100 text-green-700 text-xs font-semibold rounded-full px-2.5 py-0.5">Vendedor</span>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756] text-xs">Maria Gerente</td>
+                  <td class="px-5 py-3.5 text-center">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </label>
+                  </td>
+                  <td class="px-5 py-3.5 text-center">
+                    <button onclick="openComissaoUserModal('Ana Santos', false)" title="Comissao Padrao"
+                            class="inline-flex items-center gap-1 text-[#575756] hover:text-[#1C1C1C] transition-colors">
+                      <span class="material-symbols-rounded" style="font-size:16px">percent</span>
+                      <span class="text-xs text-[#DADADA]">Padrao</span>
+                    </button>
+                  </td>
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <button onclick="openEditModal('Ana Santos')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Editar
+                      </button>
+                      <button onclick="openPermissoesModal('Ana Santos')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Permissoes
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 6: Lucas Mendes -->
+                <tr class="hover:bg-[#F2F2F2] transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-green-700 text-xs font-bold flex-shrink-0">LM</div>
+                      <span class="font-medium text-[#1C1C1C]">Lucas Mendes</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756]">lucas@callcenter.com</td>
+                  <td class="px-5 py-3.5">
+                    <span class="inline-flex items-center bg-green-100 text-green-700 text-xs font-semibold rounded-full px-2.5 py-0.5">Vendedor</span>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756] text-xs">Ricardo Gerente</td>
+                  <td class="px-5 py-3.5 text-center">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </label>
+                  </td>
+                  <td class="px-5 py-3.5 text-center">
+                    <button onclick="openComissaoUserModal('Lucas Mendes', false)" title="Comissao Padrao"
+                            class="inline-flex items-center gap-1 text-[#575756] hover:text-[#1C1C1C] transition-colors">
+                      <span class="material-symbols-rounded" style="font-size:16px">percent</span>
+                      <span class="text-xs text-[#DADADA]">Padrao</span>
+                    </button>
+                  </td>
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <button onclick="openEditModal('Lucas Mendes')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Editar
+                      </button>
+                      <button onclick="openPermissoesModal('Lucas Mendes')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Permissoes
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 7: Fernanda Costa -->
+                <tr class="hover:bg-[#F2F2F2] transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-green-700 text-xs font-bold flex-shrink-0">FC</div>
+                      <span class="font-medium text-[#1C1C1C]">Fernanda Costa</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756]">fernanda@callcenter.com</td>
+                  <td class="px-5 py-3.5">
+                    <span class="inline-flex items-center bg-green-100 text-green-700 text-xs font-semibold rounded-full px-2.5 py-0.5">Vendedor</span>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756] text-xs">Ricardo Gerente</td>
+                  <td class="px-5 py-3.5 text-center">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </label>
+                  </td>
+                  <td class="px-5 py-3.5 text-center">
+                    <button onclick="openComissaoUserModal('Fernanda Costa', true)" title="Comissao Personalizada"
+                            class="inline-flex items-center gap-1 text-[#F1E52F] hover:brightness-90 transition-colors">
+                      <span class="material-symbols-rounded" style="font-size:16px">percent</span>
+                      <span class="text-xs font-semibold bg-[#F1E52F] text-[#1C1C1C] rounded-full px-1.5 py-0.5 leading-none">!</span>
+                    </button>
+                  </td>
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <button onclick="openEditModal('Fernanda Costa')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Editar
+                      </button>
+                      <button onclick="openPermissoesModal('Fernanda Costa')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Permissoes
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 8: Carlos Oliveira (inactive) -->
+                <tr class="hover:bg-[#F2F2F2] transition-colors opacity-60">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs font-bold flex-shrink-0">CO</div>
+                      <span class="font-medium text-[#575756]">Carlos Oliveira</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756]">carlos@callcenter.com</td>
+                  <td class="px-5 py-3.5">
+                    <span class="inline-flex items-center bg-green-100 text-green-700 text-xs font-semibold rounded-full px-2.5 py-0.5">Vendedor</span>
+                  </td>
+                  <td class="px-5 py-3.5 text-[#575756] text-xs">Maria Gerente</td>
+                  <td class="px-5 py-3.5 text-center">
+                    <label class="toggle-switch">
+                      <input type="checkbox">
+                      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </label>
+                  </td>
+                  <td class="px-5 py-3.5 text-center">
+                    <button onclick="openComissaoUserModal('Carlos Oliveira', true)" title="Comissao Personalizada"
+                            class="inline-flex items-center gap-1 text-[#F1E52F] hover:brightness-90 transition-colors">
+                      <span class="material-symbols-rounded" style="font-size:16px">percent</span>
+                      <span class="text-xs font-semibold bg-[#F1E52F] text-[#1C1C1C] rounded-full px-1.5 py-0.5 leading-none">!</span>
+                    </button>
+                  </td>
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <button onclick="openEditModal('Carlos Oliveira')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Editar
+                      </button>
+                      <button onclick="openPermissoesModal('Carlos Oliveira')"
+                              class="border border-[#DADADA] text-[#575756] rounded-lg px-3 py-1.5 text-xs hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+                        Permissoes
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- end table card -->
+
+      </div>
+      <!-- end content area -->
+
+    </main>
+    <!-- end main -->
+
+  </div>
+  <!-- end layout wrapper -->
+
+
+  <!-- ============================================================
+       MODAL 1 — EDITAR USUARIO
+  ============================================================ -->
+  <div id="modal-editar" class="modal-overlay hidden" onclick="handleOverlayClick(event, 'modal-editar')">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md" onclick="event.stopPropagation()">
+
+      <!-- Modal header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[#DADADA]">
+        <h2 class="text-base font-bold text-[#1C1C1C]">Editar Usuario</h2>
+        <button onclick="closeEditModal()" class="text-[#575756] hover:text-[#1C1C1C] transition-colors">
+          <span class="material-symbols-rounded" style="font-size:20px">close</span>
+        </button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="px-6 py-5 space-y-4">
+
+        <!-- Nome -->
+        <div>
+          <label class="block text-xs font-semibold text-[#575756] uppercase tracking-wide mb-1.5">Nome</label>
+          <input id="edit-nome" type="text"
+                 class="w-full border border-[#DADADA] rounded-lg px-3 py-2 text-sm text-[#1C1C1C] focus:outline-none focus:border-[#F1E52F] focus:ring-1 focus:ring-[#F1E52F]"
+                 placeholder="Nome completo">
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-xs font-semibold text-[#575756] uppercase tracking-wide mb-1.5">Email</label>
+          <input id="edit-email" type="text"
+                 class="w-full border border-[#DADADA] rounded-lg px-3 py-2 text-sm text-[#1C1C1C] focus:outline-none focus:border-[#F1E52F] focus:ring-1 focus:ring-[#F1E52F]"
+                 placeholder="email@exemplo.com">
+        </div>
+
+        <!-- Perfil -->
+        <div>
+          <label class="block text-xs font-semibold text-[#575756] uppercase tracking-wide mb-1.5">Perfil</label>
+          <select id="edit-perfil"
+                  onchange="toggleGerenteField()"
+                  class="w-full border border-[#DADADA] rounded-lg px-3 py-2 text-sm text-[#1C1C1C] focus:outline-none focus:border-[#F1E52F] focus:ring-1 focus:ring-[#F1E52F] bg-white">
+            <option value="">Selecionar perfil</option>
+            <option value="admin">Admin</option>
+            <option value="gerente">Gerente</option>
+            <option value="vendedor">Vendedor</option>
+          </select>
+        </div>
+
+        <!-- Gerente Vinculado (only for vendedor) -->
+        <div id="edit-gerente-wrapper" class="hidden">
+          <label class="block text-xs font-semibold text-[#575756] uppercase tracking-wide mb-1.5">Gerente Vinculado</label>
+          <select id="edit-gerente"
+                  class="w-full border border-[#DADADA] rounded-lg px-3 py-2 text-sm text-[#1C1C1C] focus:outline-none focus:border-[#F1E52F] focus:ring-1 focus:ring-[#F1E52F] bg-white">
+            <option value="">Sem gerente</option>
+            <option value="maria">Maria Gerente</option>
+            <option value="ricardo">Ricardo Gerente</option>
+          </select>
+        </div>
+
+        <!-- Toggle ativo/inativo -->
+        <div class="flex items-center justify-between pt-1">
+          <div>
+            <p class="text-sm font-semibold text-[#1C1C1C]">Status do usuario</p>
+            <p class="text-xs text-[#575756]">Desativar impede o acesso ao sistema</p>
+          </div>
+          <label class="toggle-switch">
+            <input id="edit-ativo" type="checkbox" checked>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- Modal footer -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#DADADA]">
+        <button onclick="closeEditModal()"
+                class="border border-[#DADADA] text-[#575756] rounded-lg px-4 py-2 text-sm hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+          Cancelar
+        </button>
+        <button onclick="closeEditModal()"
+                class="bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg px-5 py-2 text-sm hover:brightness-95 transition-all">
+          Salvar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       MODAL 2 — PERMISSOES
+  ============================================================ -->
+  <div id="modal-permissoes" class="modal-overlay hidden" onclick="handleOverlayClick(event, 'modal-permissoes')">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl" onclick="event.stopPropagation()">
+
+      <!-- Modal header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[#DADADA]">
+        <div>
+          <h2 class="text-base font-bold text-[#1C1C1C]">Permissoes</h2>
+          <p id="permissoes-subtitle" class="text-xs text-[#575756] mt-0.5">Configurando para: —</p>
+        </div>
+        <button onclick="closePermissoesModal()" class="text-[#575756] hover:text-[#1C1C1C] transition-colors">
+          <span class="material-symbols-rounded" style="font-size:20px">close</span>
+        </button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="px-6 py-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- LEFT: Empresas permitidas -->
+          <div>
+            <h3 class="text-xs font-bold text-[#1C1C1C] uppercase tracking-wide mb-3 flex items-center gap-2">
+              <span class="material-symbols-rounded text-[#575756]" style="font-size:14px">domain</span>
+              Empresas permitidas
+            </h3>
+            <div class="space-y-2.5">
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" checked
+                       class="w-4 h-4 rounded border-[#DADADA] text-[#F1E52F] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors">NutriVida</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" checked
+                       class="w-4 h-4 rounded border-[#DADADA] text-[#F1E52F] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors">BelezaPura</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox"
+                       class="w-4 h-4 rounded border-[#DADADA] text-[#F1E52F] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors">DermaPlus</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" checked
+                       class="w-4 h-4 rounded border-[#DADADA] text-[#F1E52F] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors">VitalFarma</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox"
+                       class="w-4 h-4 rounded border-[#DADADA] text-[#F1E52F] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors">CorpoIdeal</span>
+              </label>
+
+              <p class="text-xs text-[#DADADA] pt-1">FitMax desabilitada na camada global</p>
+
+            </div>
+          </div>
+
+          <!-- RIGHT: Tipos de lead permitidos -->
+          <div>
+            <h3 class="text-xs font-bold text-[#1C1C1C] uppercase tracking-wide mb-3 flex items-center gap-2">
+              <span class="material-symbols-rounded text-[#575756]" style="font-size:14px">label</span>
+              Tipos de lead permitidos
+            </h3>
+            <div class="space-y-2.5">
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" checked
+                       class="w-4 h-4 rounded border-[#DADADA] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors leading-tight">Cartoes Aprovados KITS Site</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox"
+                       class="w-4 h-4 rounded border-[#DADADA] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors leading-tight">Cartoes Aprovados AMOSTRAS Site</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox"
+                       class="w-4 h-4 rounded border-[#DADADA] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors leading-tight">Recuperacao amostras recusados SITE</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" checked
+                       class="w-4 h-4 rounded border-[#DADADA] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors leading-tight">Abandonos Site</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" checked
+                       class="w-4 h-4 rounded border-[#DADADA] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors leading-tight">Pix Pagos Site</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox"
+                       class="w-4 h-4 rounded border-[#DADADA] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors leading-tight">Pix Pendentes Site</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox"
+                       class="w-4 h-4 rounded border-[#DADADA] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors leading-tight">Boletos Pagos Site</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox"
+                       class="w-4 h-4 rounded border-[#DADADA] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors leading-tight">Boletos Pendentes Site</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" checked
+                       class="w-4 h-4 rounded border-[#DADADA] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors leading-tight">Cartao Recusado KIT Site</span>
+              </label>
+
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" checked
+                       class="w-4 h-4 rounded border-[#DADADA] accent-[#1C1C1C] cursor-pointer">
+                <span class="text-sm text-[#1C1C1C] group-hover:text-[#575756] transition-colors leading-tight">Cartao Recusado Falta de Saldo</span>
+              </label>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Modal footer -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#DADADA]">
+        <button onclick="closePermissoesModal()"
+                class="border border-[#DADADA] text-[#575756] rounded-lg px-4 py-2 text-sm hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+          Cancelar
+        </button>
+        <button onclick="closePermissoesModal()"
+                class="bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg px-5 py-2 text-sm hover:brightness-95 transition-all">
+          Salvar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       MODAL — COMISSAO PADRAO
+  ============================================================ -->
+  <div id="modal-comissao-padrao" class="modal-overlay hidden" onclick="handleOverlayClick(event, 'modal-comissao-padrao')">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-xl" onclick="event.stopPropagation()">
+
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[#DADADA]">
+        <div>
+          <h2 class="text-base font-bold text-[#1C1C1C]">Comissao Padrao por Tipo de Atendimento</h2>
+          <p class="text-xs text-[#575756] mt-0.5">Aplicada a todos os vendedores que nao possuem comissao personalizada</p>
+        </div>
+        <button onclick="closeComissaoPadraoModal()" class="text-[#575756] hover:text-[#1C1C1C] transition-colors">
+          <span class="material-symbols-rounded" style="font-size:20px">close</span>
+        </button>
+      </div>
+
+      <div class="px-6 py-4 max-h-[420px] overflow-y-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-[#DADADA]">
+              <th class="text-left py-2 text-xs font-semibold text-[#575756] uppercase">Tipo de Atendimento</th>
+              <th class="text-right py-2 text-xs font-semibold text-[#575756] uppercase w-24">Comissao %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-[#F2F2F2]">
+              <td class="py-2.5 text-[#1C1C1C]">Cartoes Aprovados KITS Site</td>
+              <td class="py-2.5 text-right"><input type="number" value="4" step="0.5" min="0" max="100" class="w-20 border border-[#DADADA] rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:border-[#F1E52F]"></td>
+            </tr>
+            <tr class="border-b border-[#F2F2F2]">
+              <td class="py-2.5 text-[#1C1C1C]">Cartoes Aprovados AMOSTRAS Site</td>
+              <td class="py-2.5 text-right"><input type="number" value="3" step="0.5" min="0" max="100" class="w-20 border border-[#DADADA] rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:border-[#F1E52F]"></td>
+            </tr>
+            <tr class="border-b border-[#F2F2F2]">
+              <td class="py-2.5 text-[#1C1C1C]">Recuperacao amostras recusados</td>
+              <td class="py-2.5 text-right"><input type="number" value="5" step="0.5" min="0" max="100" class="w-20 border border-[#DADADA] rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:border-[#F1E52F]"></td>
+            </tr>
+            <tr class="border-b border-[#F2F2F2]">
+              <td class="py-2.5 text-[#1C1C1C]">Abandonos Site</td>
+              <td class="py-2.5 text-right"><input type="number" value="5" step="0.5" min="0" max="100" class="w-20 border border-[#DADADA] rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:border-[#F1E52F]"></td>
+            </tr>
+            <tr class="border-b border-[#F2F2F2]">
+              <td class="py-2.5 text-[#1C1C1C]">Pix Pagos Site</td>
+              <td class="py-2.5 text-right"><input type="number" value="3" step="0.5" min="0" max="100" class="w-20 border border-[#DADADA] rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:border-[#F1E52F]"></td>
+            </tr>
+            <tr class="border-b border-[#F2F2F2]">
+              <td class="py-2.5 text-[#1C1C1C]">Pix Pendentes Site</td>
+              <td class="py-2.5 text-right"><input type="number" value="4" step="0.5" min="0" max="100" class="w-20 border border-[#DADADA] rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:border-[#F1E52F]"></td>
+            </tr>
+            <tr class="border-b border-[#F2F2F2]">
+              <td class="py-2.5 text-[#1C1C1C]">Boletos Pagos Site</td>
+              <td class="py-2.5 text-right"><input type="number" value="3" step="0.5" min="0" max="100" class="w-20 border border-[#DADADA] rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:border-[#F1E52F]"></td>
+            </tr>
+            <tr class="border-b border-[#F2F2F2]">
+              <td class="py-2.5 text-[#1C1C1C]">Boletos Pendentes Site</td>
+              <td class="py-2.5 text-right"><input type="number" value="4" step="0.5" min="0" max="100" class="w-20 border border-[#DADADA] rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:border-[#F1E52F]"></td>
+            </tr>
+            <tr class="border-b border-[#F2F2F2]">
+              <td class="py-2.5 text-[#1C1C1C]">Cartao Recusado KIT Site</td>
+              <td class="py-2.5 text-right"><input type="number" value="6" step="0.5" min="0" max="100" class="w-20 border border-[#DADADA] rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:border-[#F1E52F]"></td>
+            </tr>
+            <tr>
+              <td class="py-2.5 text-[#1C1C1C]">Cartao Recusado Falta de Saldo</td>
+              <td class="py-2.5 text-right"><input type="number" value="6" step="0.5" min="0" max="100" class="w-20 border border-[#DADADA] rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:border-[#F1E52F]"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#DADADA]">
+        <button onclick="closeComissaoPadraoModal()" class="border border-[#DADADA] text-[#575756] rounded-lg px-4 py-2 text-sm hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">Cancelar</button>
+        <button onclick="closeComissaoPadraoModal()" class="bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg px-5 py-2 text-sm hover:brightness-95 transition-all">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       MODAL — COMISSAO DO USUARIO
+  ============================================================ -->
+  <div id="modal-comissao-user" class="modal-overlay hidden" onclick="handleOverlayClick(event, 'modal-comissao-user')">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl" onclick="event.stopPropagation()">
+
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[#DADADA]">
+        <div>
+          <h2 class="text-base font-bold text-[#1C1C1C]">Comissao</h2>
+          <p id="comissao-user-subtitle" class="text-xs text-[#575756] mt-0.5">Vendedor: —</p>
+        </div>
+        <button onclick="closeComissaoUserModal()" class="text-[#575756] hover:text-[#1C1C1C] transition-colors">
+          <span class="material-symbols-rounded" style="font-size:20px">close</span>
+        </button>
+      </div>
+
+      <!-- Info banner -->
+      <div class="mx-6 mt-4 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-start gap-2">
+        <span class="material-symbols-rounded text-blue-500 shrink-0 mt-0.5" style="font-size:16px">info</span>
+        <p class="text-xs text-blue-700">Valores em branco usam a comissao padrao. Altere apenas os tipos que precisam de comissao diferenciada.</p>
+      </div>
+
+      <div class="px-6 py-4 max-h-[380px] overflow-y-auto">
+        <table class="w-full text-sm" id="comissao-user-table">
+          <thead>
+            <tr class="border-b border-[#DADADA]">
+              <th class="text-left py-2 text-xs font-semibold text-[#575756] uppercase">Tipo de Atendimento</th>
+              <th class="text-center py-2 text-xs font-semibold text-[#575756] uppercase w-24">Padrao %</th>
+              <th class="text-center py-2 text-xs font-semibold text-[#575756] uppercase w-28">Personalizado %</th>
+            </tr>
+          </thead>
+          <tbody id="comissao-user-tbody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between px-6 py-4 border-t border-[#DADADA]">
+        <button onclick="restaurarPadrao()" class="border border-[#DADADA] text-[#575756] rounded-lg px-4 py-2 text-sm hover:border-[#575756] hover:text-[#1C1C1C] transition-colors flex items-center gap-1.5">
+          <span class="material-symbols-rounded" style="font-size:14px">refresh</span>
+          Restaurar Padrao
+        </button>
+        <div class="flex items-center gap-3">
+          <button onclick="closeComissaoUserModal()" class="border border-[#DADADA] text-[#575756] rounded-lg px-4 py-2 text-sm hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">Cancelar</button>
+          <button onclick="closeComissaoUserModal()" class="bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg px-5 py-2 text-sm hover:brightness-95 transition-all">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       MODAL 3 — GERENCIAR EQUIPE
+  ============================================================ -->
+  <div id="modal-equipe" class="modal-overlay hidden" onclick="handleOverlayClick(event, 'modal-equipe')">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg" onclick="event.stopPropagation()">
+
+      <!-- Modal header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[#DADADA]">
+        <div>
+          <h2 class="text-base font-bold text-[#1C1C1C]">Gerenciar Equipe</h2>
+          <p id="equipe-subtitle" class="text-xs text-[#575756] mt-0.5">Gerente: —</p>
+        </div>
+        <button onclick="closeEquipeModal()" class="text-[#575756] hover:text-[#1C1C1C] transition-colors">
+          <span class="material-symbols-rounded" style="font-size:20px">close</span>
+        </button>
+      </div>
+
+      <!-- Info banner -->
+      <div class="mx-6 mt-4 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-start gap-2">
+        <span class="material-symbols-rounded text-blue-500 shrink-0 mt-0.5" style="font-size:16px">info</span>
+        <p class="text-xs text-blue-700">Selecione os vendedores que serao vinculados a este gerente. Vendedores ja vinculados a outro gerente estao sinalizados.</p>
+      </div>
+
+      <!-- Search -->
+      <div class="px-6 pt-4">
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#575756]">
+            <span class="material-symbols-rounded" style="font-size:16px">search</span>
+          </span>
+          <input type="text" placeholder="Buscar vendedor..." class="w-full border border-[#DADADA] rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-[#F1E52F] focus:ring-1 focus:ring-[#F1E52F] placeholder-[#DADADA]">
+        </div>
+      </div>
+
+      <!-- Sellers list -->
+      <div class="px-6 py-4 space-y-1 max-h-[340px] overflow-y-auto" id="equipe-sellers-list">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Modal footer -->
+      <div class="flex items-center justify-between px-6 py-4 border-t border-[#DADADA]">
+        <p class="text-xs text-[#575756]" id="equipe-count">0 vendedores selecionados</p>
+        <div class="flex items-center gap-3">
+          <button onclick="closeEquipeModal()"
+                  class="border border-[#DADADA] text-[#575756] rounded-lg px-4 py-2 text-sm hover:border-[#575756] hover:text-[#1C1C1C] transition-colors">
+            Cancelar
+          </button>
+          <button onclick="closeEquipeModal()"
+                  class="bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg px-5 py-2 text-sm hover:brightness-95 transition-all">
+            Salvar
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       SCRIPTS
+  ============================================================ -->
+  <script>
+    // ── Sidebar toggle ──────────────────────────────────────────
+    let sidebarExpanded = true;
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const main = document.getElementById('main-content');
+      const icon = document.getElementById('toggle-icon');
+
+      sidebarExpanded = !sidebarExpanded;
+
+      if (sidebarExpanded) {
+        sidebar.classList.remove('compact');
+        sidebar.classList.add('expanded');
+        main.style.marginLeft = '220px';
+        icon.textContent = 'menu_open';
+      } else {
+        sidebar.classList.remove('expanded');
+        sidebar.classList.add('compact');
+        main.style.marginLeft = '64px';
+        icon.textContent = 'menu_open';
+      }
+    }
+
+    // ── Modal: Editar ───────────────────────────────────────────
+    function openEditModal(userName) {
+      const modal = document.getElementById('modal-editar');
+      const nameInput = document.getElementById('edit-nome');
+
+      // Pre-fill name if editing an existing user
+      if (userName && userName !== 'Novo Usuario') {
+        nameInput.value = userName;
+      } else {
+        nameInput.value = '';
+      }
+
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditModal() {
+      const modal = document.getElementById('modal-editar');
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Show/hide gerente field based on perfil selection
+    function toggleGerenteField() {
+      const perfil = document.getElementById('edit-perfil').value;
+      const gerenteWrapper = document.getElementById('edit-gerente-wrapper');
+
+      if (perfil === 'vendedor') {
+        gerenteWrapper.classList.remove('hidden');
+      } else {
+        gerenteWrapper.classList.add('hidden');
+      }
+    }
+
+    // ── Modal: Permissoes ────────────────────────────────────────
+    function openPermissoesModal(userName) {
+      const modal = document.getElementById('modal-permissoes');
+      const subtitle = document.getElementById('permissoes-subtitle');
+
+      subtitle.textContent = 'Configurando para: ' + userName;
+
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePermissoesModal() {
+      const modal = document.getElementById('modal-permissoes');
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // ── Modal: Comissao Padrao ────────────────────────────────────
+    function openComissaoPadraoModal() {
+      document.getElementById('modal-comissao-padrao').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeComissaoPadraoModal() {
+      document.getElementById('modal-comissao-padrao').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // ── Modal: Comissao do Usuario ──────────────────────────────
+    const comissaoTipos = [
+      { tipo: 'Cartoes Aprovados KITS Site', padrao: 4 },
+      { tipo: 'Cartoes Aprovados AMOSTRAS Site', padrao: 3 },
+      { tipo: 'Recuperacao amostras recusados', padrao: 5 },
+      { tipo: 'Abandonos Site', padrao: 5 },
+      { tipo: 'Pix Pagos Site', padrao: 3 },
+      { tipo: 'Pix Pendentes Site', padrao: 4 },
+      { tipo: 'Boletos Pagos Site', padrao: 3 },
+      { tipo: 'Boletos Pendentes Site', padrao: 4 },
+      { tipo: 'Cartao Recusado KIT Site', padrao: 6 },
+      { tipo: 'Cartao Recusado Falta de Saldo', padrao: 6 },
+    ];
+
+    // Mock: vendedores com comissao personalizada
+    const comissaoPersonalizada = {
+      'Fernanda Costa': { 'Abandonos Site': 7, 'Cartao Recusado KIT Site': 8, 'Pix Pagos Site': 5 },
+      'Carlos Oliveira': { 'Cartoes Aprovados KITS Site': 5, 'Recuperacao amostras recusados': 7 },
+    };
+
+    function openComissaoUserModal(userName, hasCustom) {
+      const subtitle = document.getElementById('comissao-user-subtitle');
+      const tbody = document.getElementById('comissao-user-tbody');
+      subtitle.textContent = 'Vendedor: ' + userName;
+
+      const custom = comissaoPersonalizada[userName] || {};
+
+      tbody.innerHTML = comissaoTipos.map(t => {
+        const customVal = custom[t.tipo];
+        const hasVal = customVal !== undefined;
+        const rowBg = hasVal ? 'bg-yellow-50' : '';
+        return `
+          <tr class="border-b border-[#F2F2F2] ${rowBg}">
+            <td class="py-2.5 text-[#1C1C1C]">${t.tipo}</td>
+            <td class="py-2.5 text-center text-[#DADADA]">${t.padrao}%</td>
+            <td class="py-2.5 text-center">
+              <input type="number" ${hasVal ? 'value="' + customVal + '"' : ''} step="0.5" min="0" max="100"
+                     placeholder="—"
+                     class="w-20 border border-[#DADADA] rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:border-[#F1E52F] placeholder-[#DADADA]">
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('modal-comissao-user').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeComissaoUserModal() {
+      document.getElementById('modal-comissao-user').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function restaurarPadrao() {
+      document.querySelectorAll('#comissao-user-tbody input').forEach(input => {
+        input.value = '';
+        input.closest('tr').classList.remove('bg-yellow-50');
+      });
+    }
+
+    // ── Modal: Gerenciar Equipe ───────────────────────────────────
+    const allSellers = [
+      { name: 'Joao Silva', initials: 'JS', gerente: 'Maria Gerente' },
+      { name: 'Ana Santos', initials: 'AS', gerente: 'Maria Gerente' },
+      { name: 'Lucas Mendes', initials: 'LM', gerente: 'Ricardo Gerente' },
+      { name: 'Fernanda Costa', initials: 'FC', gerente: 'Ricardo Gerente' },
+      { name: 'Carlos Oliveira', initials: 'CO', gerente: 'Maria Gerente' },
+      { name: 'Bruno Almeida', initials: 'BA', gerente: null },
+      { name: 'Priscila Rocha', initials: 'PR', gerente: null },
+      { name: 'Thiago Martins', initials: 'TM', gerente: null },
+    ];
+
+    function openEquipeModal(gerenteName) {
+      const modal = document.getElementById('modal-equipe');
+      const subtitle = document.getElementById('equipe-subtitle');
+      const list = document.getElementById('equipe-sellers-list');
+
+      subtitle.textContent = 'Gerente: ' + gerenteName;
+
+      list.innerHTML = allSellers.map(s => {
+        const isLinkedToThis = s.gerente === gerenteName;
+        const isLinkedToOther = s.gerente && s.gerente !== gerenteName;
+        const checkedAttr = isLinkedToThis ? 'checked' : '';
+
+        let vinculoHtml = '';
+        if (isLinkedToOther) {
+          vinculoHtml = `<span class="text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded-full px-2 py-0.5 flex items-center gap-1 whitespace-nowrap">
+            <span class="material-symbols-rounded" style="font-size:12px">link</span>
+            Vinculado a ${s.gerente}
+          </span>`;
+        } else if (isLinkedToThis) {
+          vinculoHtml = `<span class="text-xs text-green-600 bg-green-50 border border-green-200 rounded-full px-2 py-0.5 flex items-center gap-1 whitespace-nowrap">
+            <span class="material-symbols-rounded" style="font-size:12px">check</span>
+            Na sua equipe
+          </span>`;
+        } else {
+          vinculoHtml = `<span class="text-xs text-[#DADADA]">Sem vinculo</span>`;
+        }
+
+        return `
+          <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#F2F2F2] cursor-pointer transition-colors">
+            <input type="checkbox" ${checkedAttr}
+                   class="w-4 h-4 rounded border-[#DADADA] accent-[#1C1C1C] cursor-pointer shrink-0"
+                   onchange="updateEquipeCount()">
+            <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-green-700 text-xs font-bold shrink-0">${s.initials}</div>
+            <span class="text-sm font-medium text-[#1C1C1C] flex-1">${s.name}</span>
+            ${vinculoHtml}
+          </label>
+        `;
+      }).join('');
+
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      updateEquipeCount();
+    }
+
+    function closeEquipeModal() {
+      const modal = document.getElementById('modal-equipe');
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function updateEquipeCount() {
+      const checkboxes = document.querySelectorAll('#equipe-sellers-list input[type="checkbox"]:checked');
+      document.getElementById('equipe-count').textContent = checkboxes.length + ' vendedores selecionados';
+    }
+
+    // Close modal when clicking the dark overlay
+    function handleOverlayClick(event, modalId) {
+      if (event.target === event.currentTarget) {
+        if (modalId === 'modal-editar') closeEditModal();
+        if (modalId === 'modal-permissoes') closePermissoesModal();
+        if (modalId === 'modal-equipe') closeEquipeModal();
+        if (modalId === 'modal-comissao-padrao') closeComissaoPadraoModal();
+        if (modalId === 'modal-comissao-user') closeComissaoUserModal();
+      }
+    }
+
+    // Close modals with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeEditModal();
+        closePermissoesModal();
+        closeEquipeModal();
+        closeComissaoPadraoModal();
+        closeComissaoUserModal();
+      }
+    });
+  </script>
+
+</body>
+</html>
