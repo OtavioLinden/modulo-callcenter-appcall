@@ -230,50 +230,30 @@
     <main class="flex-1 overflow-y-auto p-6">
 
       <!-- Filters card -->
-      <div class="bg-white rounded-xl shadow-sm p-5 mb-5">
-        <h2 class="text-sm font-semibold text-[#1C1C1C] mb-4 flex items-center gap-2">
-          <span class="material-symbols-rounded text-[#575756]" style="font-size:16px">filter_list</span>
-          Filtros
-        </h2>
+      <div class="bg-white rounded-xl shadow-sm p-4 mb-5">
 
-        <!-- Row 1 -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div class="relative" id="ms-empresa"></div>
-          <div class="relative" id="ms-tipo-lead"></div>
-          <div>
-            <label class="filter-label">Nome</label>
-            <input type="text" placeholder="Buscar por nome..." class="filter-input">
+        <!-- Row: filtros de categoria + botao -->
+        <div class="flex items-end gap-3 mb-3">
+          <div class="flex-1 grid grid-cols-2 lg:grid-cols-5 gap-3">
+            <div class="relative" id="ms-empresa"></div>
+            <div class="relative" id="ms-tipo-lead"></div>
+            <div class="relative" id="ms-valor"></div>
+            <div class="relative" id="drp-periodo"></div>
+            <div class="relative" id="ms-status"></div>
           </div>
-          <div>
-            <label class="filter-label">Telefone</label>
-            <input type="text" placeholder="(00) 00000-0000" class="filter-input">
-          </div>
-        </div>
-
-        <!-- Row 2 -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div>
-            <label class="filter-label">CPF</label>
-            <input type="text" placeholder="000.000.000-00" class="filter-input">
-          </div>
-          <div class="relative" id="ms-valor"></div>
-          <div class="relative" id="drp-periodo"></div>
-          <div class="flex items-end">
-            <div class="w-full border border-[#DADADA] rounded-lg px-3 py-2 flex items-center gap-2 bg-white cursor-pointer hover:border-[#F1E52F] transition-colors">
-              <input type="checkbox" id="toggle-nao-atendidos" class="w-4 h-4 accent-[#F1E52F]">
-              <label for="toggle-nao-atendidos" class="text-sm text-[#1C1C1C] cursor-pointer whitespace-nowrap">Somente não atendidos</label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Action row -->
-        <div class="flex items-center justify-between">
-          <span class="text-xs text-[#575756]">Exibindo <strong class="text-[#1C1C1C]">10</strong> de <strong class="text-[#1C1C1C]">847</strong> leads</span>
-          <button class="flex items-center gap-2 px-5 py-2 bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-sm hover:brightness-95 transition-all">
-            <span class="material-symbols-rounded" style="font-size:16px">search</span>
+          <button class="flex items-center gap-2 px-5 py-[7px] bg-[#F1E52F] text-[#1C1C1C] font-bold rounded-lg text-xs hover:brightness-95 transition-all whitespace-nowrap shrink-0">
+            <span class="material-symbols-rounded" style="font-size:14px">search</span>
             Filtrar
           </button>
         </div>
+
+        <!-- Busca unificada -->
+        <div class="mb-2">
+          <input type="text" placeholder="Buscar por nome, telefone ou CPF..." class="filter-input text-xs" style="padding:7px 12px;">
+        </div>
+
+        <!-- Contador -->
+        <span class="text-[11px] text-[#575756]">Exibindo <strong class="text-[#1C1C1C]">10</strong> de <strong class="text-[#1C1C1C]">847</strong> leads</span>
       </div>
 
       <!-- Table card -->
@@ -997,6 +977,11 @@
     ], 'Todos', 'Valor');
 
     createDateRangePicker('drp-periodo', 'Periodo');
+
+    createMultiSelect('ms-status', [
+      { value: 'atendidos', label: 'Atendidos' },
+      { value: 'nao_atendidos', label: 'Não atendidos' }
+    ], 'Todos', 'Status');
   </script>
 </body>
 </html>
