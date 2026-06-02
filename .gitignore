@@ -8,5 +8,6 @@ Thumbs.db
 *.log
 .cache/
 .superpowers/
+.gemini/
 
 .vercel
